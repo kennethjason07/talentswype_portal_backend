@@ -1,0 +1,36 @@
+================================================================================
+ALL AVAILABLE PLANS
+================================================================================
+
+1. PLATINUM ELITE
+   Price: ₹9999
+   Description: The ultimate package for professionals.
+   Features:
+      1. Unlimited Access
+      2. Priority Support
+      3. All Courses
+      4. Mentorship
+
+================================================================================
+USER LOGINS AND THEIR ACTIVE PLANS
+================================================================================
+
+Kenneth (kenj7214@gmail.com) - USER
+   Active Plan: None
+
+Kenneth (keneducare7621@gmail.com) - USER
+   Active Plan: None
+
+Admin User (admin@slanster.com) - ADMIN
+   Active Package ID: 69708cbd449318e36c49709e (No active purchase found)
+
+HR User (hr@slanster.com) - HR
+   Active Package ID: 69708cbd449318e36c49709e (No active purchase found)
+
+Standard User (user@slanster.com) - USER
+   Active Package ID: 69708cbd449318e36c49709e (No active purchase found)
+
+Premium Candidate (candidate@slanster.com) - USER
+   Active Package ID: 69708cbd449318e36c49709e (No active purchase found)
+
+================================================================================
