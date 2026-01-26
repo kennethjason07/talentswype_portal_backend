@@ -71,7 +71,7 @@ app.get("/", ServerStatus.getServerLoadInfo, (req, res) => {
     const serverLoadInfo = req.serverLoadInfo;
     res.status(200).send({
         success: true,
-        message: "Talentswayp Backend!",
+        message: "Talentswype Backend!",
         dateTime: new Date().toLocaleString(),
         connectedClient: process.env.CLIENT_BASE_URL,
         systemStatus: {
