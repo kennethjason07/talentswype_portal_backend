@@ -12,6 +12,13 @@ This script creates 3 admin accounts directly in the MongoDB database with pre-v
 | admin2@talentswype.com | `mR4$Zk8^A!Wc` | Admin Two   |
 | admin3@talentswype.com | `7B!f@2YQ#LxP` | Admin Three |
 
+## 👥 Scripts Available
+
+| Script            | Purpose                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `createAdmins.js` | Creates 3 default admin accounts.                           |
+| `clearData.js`    | Deletes ALL documents from all collections in the database. |
+
 ## 🚀 How to Run
 
 ### On Local Machine (Development)
@@ -20,11 +27,11 @@ This script creates 3 admin accounts directly in the MongoDB database with pre-v
 # Navigate to backend directory
 cd c:\Users\kened\Desktop\slanster-frontend\backendslanster
 
-# Make sure .env file has MONGO_URI configured
-# MONGO_URI=mongodb://localhost:27017/slanster
-
-# Run the script
+# Run admin creation script
 node scripts/createAdmins.js
+
+# Run data clearing script (⚠️ BE CAREFUL)
+node scripts/clearData.js
 ```
 
 ### On GCP Server (Production)
@@ -36,11 +43,11 @@ gcloud compute ssh YOUR_INSTANCE_NAME --zone YOUR_ZONE
 # Navigate to backend directory
 cd /path/to/backendslanster
 
-# Make sure .env file has production MONGO_URI
-# MONGO_URI=mongodb://your-production-db-uri
-
-# Run the script
+# Run admin creation script
 node scripts/createAdmins.js
+
+# Run data clearing script (⚠️ BE CAREFUL)
+node scripts/clearData.js
 ```
 
 ## ✅ What the Script Does
