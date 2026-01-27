@@ -69,9 +69,11 @@ export async function registerUser(req, res) {
         });
 
 
-        // Generate verification token
+        // Generate verification token with 24-hour expiration
         const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
         user.emailVerificationToken = emailVerificationToken;
+        user.emailVerificationTokenExpires = tokenExpires;
 
         // Send Verification Email
         const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
@@ -486,13 +488,60 @@ export const verifyEmail = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid or expired verification token" });
         }
 
+        // Check if token has expired
+        if (user.emailVerificationTokenExpires && user.emailVerificationTokenExpires < new Date()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Verification link has expired. Please request a new one.",
+                expired: true
+            });
+        }
+
         user.isEmailVerified = true;
         user.emailVerificationToken = null; // Clear token after usage
+        user.emailVerificationTokenExpires = null; // Clear expiration
         await user.save();
 
-        res.status(200).json({ success: true, message: "Email verified successfully" });
+        res.status(200).json({ success: true, message: "Email verified successfully! You can now login." });
     } catch (error) {
         console.error("Email Verification Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const resendVerificationEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required" });
+        }
+
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "No account found with this email" });
+        }
+
+        if (user.isEmailVerified) {
+            return res.status(400).json({ success: false, message: "Email is already verified" });
+        }
+
+        // Generate new verification token
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        user.emailVerificationToken = emailVerificationToken;
+        user.emailVerificationTokenExpires = tokenExpires;
+        await user.save();
+
+        // Send new verification email
+        const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
+        const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, user.username, clientUrl);
+        await sendEmail(email, subject, text, html);
+
+        res.status(200).json({ success: true, message: "Verification email sent successfully" });
+    } catch (error) {
+        console.error("Resend Verification Email Error:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 };

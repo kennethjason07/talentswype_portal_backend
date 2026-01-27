@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 export async function sendEmail(to, subject, text, html = null) {
     try {
         const mailOptions = {
-            from: `"MyApp" <${process.env.EMAIL_USER}>`,
+            from: `"TalentSwype" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             text,
@@ -56,7 +56,7 @@ export function loginOtpTemplate(otp) {
             <p style="margin-top: 20px;">This code will expire in <b>5 minutes</b>.</p>
             <p>If you didn’t request this, please ignore this email.</p>
             <hr style="margin: 20px 0;" />
-            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} MyApp. All rights reserved.</p>
+            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} TalentSwype. All rights reserved.</p>
         </div>
     `;
 
@@ -79,7 +79,7 @@ export function forgotPasswordOtpTemplate(otp) {
             <p style="margin-top: 20px;">This code will expire in <b>5 minutes</b>.</p>
             <p>If you didn’t request this, you can safely ignore this email.</p>
             <hr style="margin: 20px 0;" />
-            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} MyApp. All rights reserved.</p>
+            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} TalentSwype. All rights reserved.</p>
         </div>
     `;
 
@@ -93,11 +93,11 @@ export function forgotPasswordOtpTemplate(otp) {
  * @returns {{ subject: string, text: string, html: string }}
  */
 export function registerAutoPasswordTemplate(password, username = "User") {
-    const subject = "Welcome to MyApp 🎉 - Your Account Details";
+    const subject = "Welcome to TalentSwype 🎉 - Your Account Details";
 
     const text = `Hello ${username},
 
-Welcome to MyApp! We're excited to have you on board.
+Welcome to TalentSwype! We're excited to have you on board.
 
 Here are your login details:
 Password: ${password}
@@ -141,26 +141,32 @@ Thank you for joining us!
  * @returns {{ subject: string, text: string, html: string }}
  */
 export function emailVerificationTemplate(token, username, baseUrl) {
-    const subject = "Verify your email address - MyApp";
+    const subject = "Verify your email address - TalentSwype";
     const verificationLink = `${baseUrl}/verify-email?token=${token}`;
     
-    const text = `Hello ${username},\n\nPlease verify your email address by clicking the following link:\n${verificationLink}\n\nIf you didn't create an account, please ignore this email.`;
+    const text = `Hello ${username},\n\nThank you for registering with TalentSwype!\n\nPlease verify your email address by clicking the following link:\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.`;
     
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #333;">Welcome to Slanster! 👋</h2>
+            <h2 style="color: #333;">Welcome to TalentSwype! 👋</h2>
             <p>Hello <b>${username}</b>,</p>
-            <p>Please verify your email address to get started.</p>
+            <p>Thank you for registering! To complete your registration and access all features, please verify your email address.</p>
             
             <div style="margin: 30px 0; text-align: center;">
-                <a href="${verificationLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Verify Email</a>
+                <a href="${verificationLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; display: inline-block;">Verify Email Address</a>
             </div>
             
             <p style="color: #666; font-size: 14px;">Or copy and paste this link in your browser:</p>
-            <p style="color: #666; font-size: 12px; word-break: break-all;">${verificationLink}</p>
+            <p style="color: #007bff; font-size: 12px; word-break: break-all; background: #f4f4f4; padding: 10px; border-radius: 5px;">${verificationLink}</p>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+                <p style="margin: 0; color: #856404; font-size: 14px;">⏰ <b>Important:</b> This verification link will expire in <b>24 hours</b>.</p>
+            </div>
+            
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">If you didn't create an account with TalentSwype, you can safely ignore this email.</p>
             
             <hr style="margin: 20px 0;" />
-            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} Slanster. All rights reserved.</p>
+            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} TalentSwype. All rights reserved.</p>
         </div>
     `;
 

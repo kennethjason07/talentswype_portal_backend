@@ -24,6 +24,7 @@ router.route('/profile/update').put(UserAuth, UsersController.updateUserProfile)
 
 // GET ROUTES
 router.route('/verify-email').get(UsersController.verifyEmail);
+router.route('/resend-verification-email').post(UsersController.resendVerificationEmail);
 
 // DELETE ROUTES
 

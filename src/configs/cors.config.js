@@ -1,6 +1,7 @@
 const allowedOrigins = [
 	'http://localhost:3000',
 	'http://localhost:3001',
+	'https://portal.talentswype.com',
 	'https://www.slanster.com',
 	'https://slanster-dashboard.vercel.app',
 	'https://slanster-admin.vercel.app',

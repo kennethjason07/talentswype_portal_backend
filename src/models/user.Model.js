@@ -40,6 +40,10 @@ export const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    emailVerificationTokenExpires: {
+        type: Date,
+        default: null,
+    },
 }, { timestamps: true });
 
 UserSchema.methods.generateAuthToken = function () {
