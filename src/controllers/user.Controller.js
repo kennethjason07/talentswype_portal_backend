@@ -84,7 +84,8 @@ export async function registerUser(req, res) {
 
         await user.save();
 
-        // Automatically assign the highest package to new users
+        /* 
+        // Automatically assign the highest package to new users (Disabled for Free Access)
         try {
             // Find the highest-priced package
             const highestPackage = await packageModel.findOne().sort({ price: -1 }).limit(1);
@@ -110,6 +111,7 @@ export async function registerUser(req, res) {
             console.error("Error assigning package to new user:", packageError);
             // Don't fail registration if package assignment fails
         }
+        */
 
         return res.status(201).json({
             success: true,

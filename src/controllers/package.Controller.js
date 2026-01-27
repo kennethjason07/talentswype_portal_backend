@@ -337,10 +337,27 @@ export const getActivePackage = async (req, res) => {
     try {
         const userId = req.user.userId;
 
-        const activePackage = await purchasedPackageModel.findOne({
+        // 1. Try to find a purchased package record with ACTIVE status
+        let activePackage = await purchasedPackageModel.findOne({
             user: userId,
             status: "ACTIVE"
-        }).populate("package"); // populate package details if needed
+        }).populate("package");
+
+        // 2. Fallback: If no purchase record, check if user has activePackage assigned in their model
+        if (!activePackage) {
+            const user = await userModel.findById(userId).populate("activePackage");
+            if (user && user.activePackage) {
+                // Return a structure consistent with purchasedPackage populate
+                return res.status(200).json({
+                    success: true,
+                    activePackage: {
+                        package: user.activePackage,
+                        status: "ACTIVE",
+                        purchasedAt: user.createdAt
+                    }
+                });
+            }
+        }
 
         if (!activePackage) {
             return res.status(404).json({ success: false, message: "No active package found" });
