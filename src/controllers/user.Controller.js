@@ -7,6 +7,8 @@ import otpModel from "../models/otp.Model.js";
 import { verifyEmailOtp, verifyPhoneOtp } from "../services/otp.service.js";
 import { forgotPasswordOtpTemplate, registerAutoPasswordTemplate, sendEmail, emailVerificationTemplate } from "../services/email/index.js";
 import userProfileModel from "../models/userProfile.Model.js";
+import packageModel from "../models/package.Model.js";
+import purchasedPackageModel from "../models/purchasedPackage.Model.js";
 
 export async function registerUser(req, res) {
     try {
@@ -81,6 +83,33 @@ export async function registerUser(req, res) {
         await sendEmail(email, subject, text, html);
 
         await user.save();
+
+        // Automatically assign the highest package to new users
+        try {
+            // Find the highest-priced package
+            const highestPackage = await packageModel.findOne().sort({ price: -1 }).limit(1);
+            
+            if (highestPackage) {
+                // Create a purchased package record
+                await purchasedPackageModel.create({
+                    user: user._id,
+                    package: highestPackage._id,
+                    purchasedAt: new Date(),
+                    status: "ACTIVE"
+                });
+
+                // Update user with active package
+                user.activePackage = highestPackage._id;
+                await user.save();
+
+                console.log(`✅ Assigned highest package "${highestPackage.name}" to user ${user.email}`);
+            } else {
+                console.warn("⚠️ No packages found in database. User registered without a package.");
+            }
+        } catch (packageError) {
+            console.error("Error assigning package to new user:", packageError);
+            // Don't fail registration if package assignment fails
+        }
 
         return res.status(201).json({
             success: true,
