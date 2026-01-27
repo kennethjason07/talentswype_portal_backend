@@ -31,7 +31,15 @@ export const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Package",
         default: null,
-    }
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false,
+    },
+    emailVerificationToken: {
+        type: String,
+        default: null,
+    },
 }, { timestamps: true });
 
 UserSchema.methods.generateAuthToken = function () {

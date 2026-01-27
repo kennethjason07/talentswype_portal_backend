@@ -22,6 +22,9 @@ router.route('/getUser').get(UserAuth, UsersController.getUser);
 // PUT ROUTES
 router.route('/profile/update').put(UserAuth, UsersController.updateUserProfile);
 
+// GET ROUTES
+router.route('/verify-email').get(UsersController.verifyEmail);
+
 // DELETE ROUTES
 
 export default router;

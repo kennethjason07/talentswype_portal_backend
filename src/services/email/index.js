@@ -132,3 +132,37 @@ Thank you for joining us!
 
     return { subject, text, html };
 }
+
+/**
+ * Template for email verification
+ * @param {string} token - Verification token
+ * @param {string} username - User's name
+ * @param {string} baseUrl - Base URL of the client application
+ * @returns {{ subject: string, text: string, html: string }}
+ */
+export function emailVerificationTemplate(token, username, baseUrl) {
+    const subject = "Verify your email address - MyApp";
+    const verificationLink = `${baseUrl}/verify-email?token=${token}`;
+    
+    const text = `Hello ${username},\n\nPlease verify your email address by clicking the following link:\n${verificationLink}\n\nIf you didn't create an account, please ignore this email.`;
+    
+    const html = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #333;">Welcome to Slanster! 👋</h2>
+            <p>Hello <b>${username}</b>,</p>
+            <p>Please verify your email address to get started.</p>
+            
+            <div style="margin: 30px 0; text-align: center;">
+                <a href="${verificationLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Verify Email</a>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">Or copy and paste this link in your browser:</p>
+            <p style="color: #666; font-size: 12px; word-break: break-all;">${verificationLink}</p>
+            
+            <hr style="margin: 20px 0;" />
+            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} Slanster. All rights reserved.</p>
+        </div>
+    `;
+
+    return { subject, text, html };
+}

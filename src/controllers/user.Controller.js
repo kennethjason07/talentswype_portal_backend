@@ -5,12 +5,12 @@ import userModel from "../models/user.Model.js";
 import { sendSMS } from "../services/twilio.service.js";
 import otpModel from "../models/otp.Model.js";
 import { verifyEmailOtp, verifyPhoneOtp } from "../services/otp.service.js";
-import { forgotPasswordOtpTemplate, registerAutoPasswordTemplate, sendEmail } from "../services/email/index.js";
+import { forgotPasswordOtpTemplate, registerAutoPasswordTemplate, sendEmail, emailVerificationTemplate } from "../services/email/index.js";
 import userProfileModel from "../models/userProfile.Model.js";
 
 export async function registerUser(req, res) {
     try {
-        const { username, email, mobileNumber, college } = req.body;
+        const { username, email, mobileNumber, college, userType } = req.body;
 
         // Validate email
         if (!validator.isEmail(email)) {
@@ -30,7 +30,7 @@ export async function registerUser(req, res) {
         }
 
         // Validate required fields
-        if (!username || !email || !mobileNumber || !college) {
+        if (!username || !email || !mobileNumber || !college || !req.body.password) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all required fields",
@@ -55,9 +55,8 @@ export async function registerUser(req, res) {
             });
         }
 
-        // Generate random password (8 characters: letters + numbers)
-        const autoPassword = crypto.randomBytes(4).toString("hex"); // Example: "a3f9c2d8"
-        const hashedPassword = await bcrypt.hash(autoPassword, 10);
+        // Hash the user-provided password
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
         // Create new user with generated password
         const user = new userModel({
@@ -66,11 +65,17 @@ export async function registerUser(req, res) {
             mobileNumber,
             college,
             password: hashedPassword,
+            userType: userType || "USER",
         });
 
 
-        // TODO: Send the autoPassword securely via Email/SMS instead of response
-        const { subject, text, html } = await registerAutoPasswordTemplate(autoPassword, username)
+        // Generate verification token
+        const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        user.emailVerificationToken = emailVerificationToken;
+
+        // Send Verification Email
+        const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
+        const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, username, clientUrl);
         await sendEmail(email, subject, text, html);
 
         await user.save();
@@ -111,6 +116,13 @@ export async function loginUserWithEmailPassword(req, res) {
             return res.status(200).send({
                 success: false,
                 message: "Email is not registerd",
+            });
+        }
+
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                success: false,
+                message: "Please verify your email address to login",
             });
         }
 
@@ -457,5 +469,30 @@ export const getUser = async (req, res) => {
     } catch (error) {
         console.error("Error fetching current user:", error);
         res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: "Invalid token" });
+        }
+
+        const user = await userModel.findOne({ emailVerificationToken: token });
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid or expired verification token" });
+        }
+
+        user.isEmailVerified = true;
+        user.emailVerificationToken = null; // Clear token after usage
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Email verified successfully" });
+    } catch (error) {
+        console.error("Email Verification Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };
