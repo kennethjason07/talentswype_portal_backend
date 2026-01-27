@@ -19,4 +19,4 @@ export const UserFeedSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-export default mongoose.model.UserFeeds || mongoose.model('UserFeed', UserFeedSchema);
+export default mongoose.models.UserFeeds || mongoose.model('UserFeed', UserFeedSchema);

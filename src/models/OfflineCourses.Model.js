@@ -66,4 +66,4 @@ export const OfflineCoursesSchema = new mongoose.Schema({
     ],
 });
 
-export default mongoose.model.OfflineCourses || mongoose.model('OfflineCourses', OfflineCoursesSchema);
+export default mongoose.models.OfflineCourses || mongoose.model('OfflineCourses', OfflineCoursesSchema);

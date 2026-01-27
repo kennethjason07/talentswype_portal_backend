@@ -71,4 +71,4 @@ export const AssessmentReportSchema = new mongoose.Schema({
     ],
 }, { timestamps: true });
 
-export default mongoose.model.AssessmentReports || mongoose.model('AssessmentReport', AssessmentReportSchema);
+export default mongoose.models.AssessmentReports || mongoose.model('AssessmentReport', AssessmentReportSchema);

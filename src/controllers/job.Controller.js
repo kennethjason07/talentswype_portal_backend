@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import jobModel from "../models/job.Model.js";
 import jobApplicationModel from "../models/jobApplication.Model.js";
 
@@ -102,7 +103,7 @@ export const deleteJob = async (req, res) => {
         const { jobId } = req.params;
 
         // Find the job
-        const job = await jobModel.findById(jobId);
+        const job = await jobModel.findById(jobId).select("+publishBy");
         if (!job) {
             return res.status(404).json({
                 success: false,
@@ -111,7 +112,7 @@ export const deleteJob = async (req, res) => {
         }
 
         // HR can only delete their own jobs
-        if (userType === "HR" && job.publishBy.toString() !== userId) {
+        if (userType === "HR" && job.publishBy?.toString() !== userId) {
             return res.status(403).json({
                 success: false,
                 message: "HR can only delete their own jobs",
@@ -138,8 +139,16 @@ export const getApplicantsForJob = async (req, res) => {
         const { jobId } = req.params;
         const { userId, userType } = req.user;
 
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Job ID format",
+            });
+        }
+
         // Find the job
-        const job = await jobModel.findById(jobId);
+        const job = await jobModel.findById(jobId).select("+publishBy");
         if (!job) {
             return res.status(404).json({
                 success: false,
@@ -148,7 +157,8 @@ export const getApplicantsForJob = async (req, res) => {
         }
 
         // HR can only view applicants for their own job posts
-        if (userType === "HR" && job.publishBy.toString() !== userId) {
+        const jobOwnerId = job.publishBy ? job.publishBy.toString() : null;
+        if (userType === "HR" && jobOwnerId !== userId) {
             return res.status(403).json({
                 success: false,
                 message: "HR can only view applicants for their own jobs",
@@ -166,9 +176,11 @@ export const getApplicantsForJob = async (req, res) => {
             data: applications,
         });
     } catch (error) {
+        console.error("GET_APPLICANTS_FOR_JOB_ERROR:", error);
         res.status(500).json({
             success: false,
-            message: error.message,
+            message: "Error fetching applicants: " + error.message,
+            debug: process.env.NODE_ENV === "development" ? error.stack : undefined
         });
     }
 };
@@ -190,7 +202,7 @@ export const manageApplication = async (req, res) => {
         // Find application
         const application = await jobApplicationModel
             .findById(applicationId)
-            .populate("job", "publishBy");
+            .populate({ path: "job", select: "+publishBy" });
 
         if (!application) {
             return res.status(404).json({
@@ -199,7 +211,8 @@ export const manageApplication = async (req, res) => {
             });
         }
 
-        if (userType === "HR" && application.job.publishBy.toString() !== userId) {
+        const jobOwnerId = application.job?.publishBy ? application.job.publishBy.toString() : null;
+        if (userType === "HR" && jobOwnerId !== userId) {
             return res.status(403).json({
                 success: false,
                 message: "HR can only manage applications for their own jobs",
@@ -237,9 +250,11 @@ export const manageApplication = async (req, res) => {
             data: application,
         });
     } catch (error) {
+        console.error("MANAGE_APPLICATION_ERROR:", error);
         res.status(500).json({
             success: false,
-            message: error.message,
+            message: "Error managing application: " + error.message,
+            debug: process.env.NODE_ENV === "development" ? error.stack : undefined
         });
     }
 };
@@ -362,16 +377,34 @@ export const getJobById = async (req, res) => {
     try {
         const { jobId } = req.params;
 
-        const job = await jobModel.findOne({
-            _id: jobId,
-            publishStatus: "active",
-        });
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Job ID format",
+            });
+        }
+
+        const job = await jobModel.findById(jobId).select("+publishBy +isApproved");
 
         if (!job) {
             return res.status(404).json({
                 success: false,
-                message: "Job not found or not active/approved",
+                message: "Job not found",
             });
+        }
+
+        const isOwner = req.user && job.publishBy && job.publishBy.toString() === req.user.userId;
+        const isAdmin = req.user && req.user.userType === "ADMIN";
+
+        // If not owner/admin, job must be active and approved
+        if (!isOwner && !isAdmin) {
+            if (job.publishStatus !== "active" || !job.isApproved) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Job not found or not active/approved",
+                });
+            }
         }
 
         // Check if user has applied

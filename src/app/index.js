@@ -25,6 +25,7 @@ import MentorRoutes from '../routes/mentor.routes.js'
 import CoursesRoutes from '../routes/courses.routes.js'
 import AssessmentRoutes from '../routes/assessment.routes.js'
 import WebinarRoutes from '../routes/webinar.routes.js'
+import AdminRoutes from '../routes/admin.routes.js'
 
 // Load environment variables from .env file
 dotenv.config();
@@ -91,6 +92,7 @@ app.use('/api/v1', MentorRoutes);
 app.use('/api/v1', CoursesRoutes);
 app.use('/api/v1', AssessmentRoutes);
 app.use('/api/v1', WebinarRoutes);
+app.use('/api/v1', AdminRoutes);
 
 // 404 ~ not found error handler
 app.use((req, res, _next) => {

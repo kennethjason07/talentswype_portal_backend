@@ -21,7 +21,7 @@ export const JobApplicationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["applied", "shortlisted", "interview", "selected", "rejected"],
+        enum: ["applied", "shortlisted", "interview", "selected", "rejected", "hired"],
         default: "applied"
     },
     appliedAt: {
@@ -38,7 +38,7 @@ export const JobApplicationSchema = new mongoose.Schema({
         {
             status: {
                 type: String,
-                enum: ["applied", "shortlisted", "interview", "selected", "rejected"],
+                enum: ["applied", "shortlisted", "interview", "selected", "rejected", "hired"],
             },
             updatedBy: {
                 type: mongoose.Schema.Types.ObjectId,

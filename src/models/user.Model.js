@@ -45,4 +45,4 @@ UserSchema.methods.generateAuthToken = function () {
     );
 };
 
-export default mongoose.model.Users || mongoose.model('User', UserSchema);
+export default mongoose.models.User || mongoose.model('User', UserSchema);
