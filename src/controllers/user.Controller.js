@@ -12,6 +12,15 @@ import purchasedPackageModel from "../models/purchasedPackage.Model.js";
 
 export async function registerUser(req, res) {
     try {
+        // Check if signup limit is reached
+        const userCount = await userModel.countDocuments();
+        if (userCount >= 60) {
+            return res.status(403).json({
+                success: false,
+                message: "Signup limit reached. Maximum 60 users allowed.",
+            });
+        }
+
         const { username, email, mobileNumber, college, userType } = req.body;
 
         // Validate email
