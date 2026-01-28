@@ -222,7 +222,7 @@ export const manageApplication = async (req, res) => {
         // If updating status
         if (status) {
             // Restrict valid statuses
-            const validStatuses = ["shortlisted", "interview", "rejected", "hired"];
+            const validStatuses = ["shortlisted", "interview", "rejected", "hired", "applied"];
             if (!validStatuses.includes(status)) {
                 return res.status(400).json({
                     success: false,
