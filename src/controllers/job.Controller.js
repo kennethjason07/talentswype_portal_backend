@@ -276,10 +276,16 @@ export const getAllJobsForAdmin = async (req, res) => {
         // Fetch all jobs
         const jobs = await jobModel
             .find()
-            .select("+isApproved +approvedBy")
+            .select("+isApproved +approvedBy +publishBy")
             .sort({ createdAt: -1 })
-            .populate("publishBy", "username email userType")
-            .populate("approvedBy", "username email userType");
+            .populate({
+                path: "publishBy",
+                select: "username email userType mobileNumber"
+            })
+            .populate({
+                path: "approvedBy",
+                select: "username email userType mobileNumber"
+            });
 
         res.status(200).json({
             success: true,
