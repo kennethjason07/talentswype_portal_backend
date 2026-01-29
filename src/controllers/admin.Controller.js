@@ -129,6 +129,40 @@ export const getCandidates = async (req, res) => {
                     preserveNullAndEmptyArrays: true
                 }
             },
+            // Lookup most recent job application
+            {
+                $lookup: {
+                    from: "jobapplications",
+                    let: { userId: "$_id" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$applicant", "$$userId"] } } },
+                        { $sort: { appliedAt: -1 } },
+                        { $limit: 1 },
+                        {
+                            $lookup: {
+                                from: "jobs",
+                                localField: "job",
+                                foreignField: "_id",
+                                as: "jobDetails"
+                            }
+                        },
+                        {
+                            $unwind: {
+                                path: "$jobDetails",
+                                preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        { $project: { "jobDetails.jobTitle": 1, "jobDetails.companyName": 1 } }
+                    ],
+                    as: "recentApplication"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$recentApplication",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {
                 $project: {
                     username: 1,
@@ -140,7 +174,9 @@ export const getCandidates = async (req, res) => {
                     "profile.city": 1,
                     "profile.state": 1,
                     "profile.skills": 1,
-                    "profile.profileCompletion": 1
+                    "profile.profileCompletion": 1,
+                    "recentApplication.jobDetails.jobTitle": 1,
+                    "recentApplication.jobDetails.companyName": 1
                 }
             }
         ]);
@@ -157,7 +193,10 @@ export const getCandidates = async (req, res) => {
             city: user.profile?.city || "Not specified",
             state: user.profile?.state || "Not specified",
             skills: user.profile?.skills || [],
-            profileCompletion: user.profile?.profileCompletion || 0
+            profileCompletion: user.profile?.profileCompletion || 0,
+            recentlyAppliedFor: user.recentApplication?.jobDetails?.jobTitle 
+                ? `${user.recentApplication.jobDetails.jobTitle}` 
+                : "Not applied yet"
         }));
 
         res.status(200).json({
@@ -173,6 +212,30 @@ export const getCandidates = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching candidates:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+};
+
+export const getCandidateHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        import("../models/jobApplication.Model.js").then(async (module) => {
+             const JobApplication = module.default;
+             
+             const applications = await JobApplication.find({ applicant: userId })
+                .populate({
+                    path: 'job',
+                    select: 'jobTitle companyName jobType location salaryRange'
+                })
+                .sort({ appliedAt: -1 });
+
+             res.status(200).json({
+                 success: true,
+                 applications
+             });
+        });
+    } catch (error) {
+        console.error("Error fetching candidate history:", error);
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 };
