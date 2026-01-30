@@ -152,7 +152,7 @@ export const getCandidates = async (req, res) => {
                                 preserveNullAndEmptyArrays: true
                             }
                         },
-                        { $project: { "jobDetails.jobTitle": 1, "jobDetails.companyName": 1 } }
+                        { $project: { "jobDetails.position": 1, "jobDetails.company": 1 } }
                     ],
                     as: "recentApplication"
                 }
@@ -175,8 +175,8 @@ export const getCandidates = async (req, res) => {
                     "profile.state": 1,
                     "profile.skills": 1,
                     "profile.profileCompletion": 1,
-                    "recentApplication.jobDetails.jobTitle": 1,
-                    "recentApplication.jobDetails.companyName": 1
+                    "recentApplication.jobDetails.position": 1,
+                    "recentApplication.jobDetails.company": 1
                 }
             }
         ]);
@@ -194,8 +194,8 @@ export const getCandidates = async (req, res) => {
             state: user.profile?.state || "Not specified",
             skills: user.profile?.skills || [],
             profileCompletion: user.profile?.profileCompletion || 0,
-            recentlyAppliedFor: user.recentApplication?.jobDetails?.jobTitle 
-                ? `${user.recentApplication.jobDetails.jobTitle}` 
+            recentlyAppliedFor: user.recentApplication?.jobDetails?.position 
+                ? `${user.recentApplication.jobDetails.position}` 
                 : "Not applied yet"
         }));
 
@@ -225,7 +225,7 @@ export const getCandidateHistory = async (req, res) => {
              const applications = await JobApplication.find({ applicant: userId })
                 .populate({
                     path: 'job',
-                    select: 'jobTitle companyName jobType location salaryRange'
+                    select: 'position company jobType location annual_salary_range'
                 })
                 .sort({ appliedAt: -1 });
 
