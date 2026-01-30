@@ -44,6 +44,19 @@ export const UserSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
+    emailUnsubscribed: {
+        type: Boolean,
+        default: false,
+    },
+    unsubscribeToken: {
+        type: String,
+        default: null
+    },
+    emailAutomationLog: [{
+        emailType: { type: String, enum: ['seeker', 'hr'] },
+        emailNumber: { type: Number }, // 1, 2, 3
+        sentAt: { type: Date, default: Date.now }
+    }],
 }, { timestamps: true });
 
 UserSchema.methods.generateAuthToken = function () {

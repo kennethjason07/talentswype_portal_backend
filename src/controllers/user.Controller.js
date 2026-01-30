@@ -6,6 +6,8 @@ import { sendSMS } from "../services/twilio.service.js";
 import otpModel from "../models/otp.Model.js";
 import { verifyEmailOtp, verifyPhoneOtp } from "../services/otp.service.js";
 import { forgotPasswordOtpTemplate, registerAutoPasswordTemplate, sendEmail, emailVerificationTemplate } from "../services/email/index.js";
+import { welcomeEmailTemplate } from "../services/email/candidateTemplates.js";
+import { welcomeHRTemplate } from "../services/email/hrTemplates.js";
 import userProfileModel from "../models/userProfile.Model.js";
 import packageModel from "../models/package.Model.js";
 import purchasedPackageModel from "../models/purchasedPackage.Model.js";
@@ -82,14 +84,28 @@ export async function registerUser(req, res) {
 
         // Generate verification token with 24-hour expiration
         const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+        const unsubscribeToken = crypto.randomBytes(32).toString("hex");
         const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
         user.emailVerificationToken = emailVerificationToken;
+        user.unsubscribeToken = unsubscribeToken;
         user.emailVerificationTokenExpires = tokenExpires;
 
         // Send Verification Email
         const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
         const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, username, clientUrl);
         await sendEmail(email, subject, text, html);
+
+        // Send Welcome Email (Immediate) for Job Seekers
+        if (user.userType === "USER") {
+            const firstName = username ? username.split(" ")[0] : "Job Seeker";
+            const welcomeEmail = welcomeEmailTemplate(firstName);
+            await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
+        } else if (user.userType === "HR") {
+            // Send Welcome Email (Immediate) for HR
+            const firstName = username ? username.split(" ")[0] : "HR Partner";
+            const welcomeEmail = welcomeHRTemplate(firstName);
+            await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
+        }
 
         await user.save();
 
@@ -582,6 +598,42 @@ export const resendVerificationEmail = async (req, res) => {
         res.status(200).json({ success: true, message: "Verification email sent successfully" });
     } catch (error) {
         console.error("Resend Verification Email Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const unsubscribeUser = async (req, res) => {
+    try {
+        // Find user by userId from auth token (if logged in) OR find by query param?
+        // Usually unsubscribe links work without login.
+        // We'll trust the userId is passed or use a token.
+        // But for MVP, let's assume we might receive a simple query/body.
+        // Better: Unsubscribe via token like verification.
+        
+        // For now, let's assume the user calls this endpoint while logged in OR we implement a token based unsubscribe later.
+        // But the guide says: portal.talentswype.com/unsubscribe?token=unsubscribe_token
+        // So we need to look up by token.
+        
+        // UNTIL we implement a dedicated unsubscribe token on signup, we can't easily do this securely without login.
+        // BUT wait, I just added `unsubscribeToken` field in the Model! I should generate it on signup.
+        
+        const { token } = req.body; 
+
+        if (!token) {
+             return res.status(400).json({ success: false, message: "Token is required" });
+        }
+
+        const user = await userModel.findOne({ unsubscribeToken: token });
+        if (!user) {
+             return res.status(400).json({ success: false, message: "Invalid token" });
+        }
+
+        user.emailUnsubscribed = true;
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Unsubscribed successfully" });
+    } catch (error) {
+        console.error("Unsubscribe Error:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
