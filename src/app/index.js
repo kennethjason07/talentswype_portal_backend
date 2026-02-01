@@ -1,5 +1,4 @@
-import './configs/dotenv.js';
-import './dotenv.js';
+import '../configs/dotenv.js';
 import express from 'express';
 import favicon from 'serve-favicon';
 import crossOrigin from 'cors';
@@ -28,9 +27,6 @@ import CoursesRoutes from '../routes/courses.routes.js'
 import AssessmentRoutes from '../routes/assessment.routes.js'
 import WebinarRoutes from '../routes/webinar.routes.js'
 import AdminRoutes from '../routes/admin.routes.js'
-
-// Load environment variables from .env file
-dotenv.config();
 
 // Initialize express app
 const app = express();
@@ -109,25 +105,25 @@ app.use((req, res, _next) => {
 
 // 500 ~ internal server error handler
 app.use((err, req, res, next) => {
+    // Ensure CORS headers are present even in error responses
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+    res.header("Access-Control-Allow-Headers", req.headers["access-control-request-headers"]);
+
     if (res.headersSent) {
-        return next('Something went wrong. App server error.');
+        return next(err);
     }
-    if (err.message) {
-        console.log(err);
-        return res.status(500).json({
-            success: false,
-            time: currentDateTime(),
-            message: "Internal Server Error",
-            error: err.message,
-        });
-    } else {
-        return res.status(500).json({
-            success: false,
-            time: currentDateTime(),
-            message: "Internal Server Error",
-            error: "Something went wrong. App server error."
-        });
-    }
+    
+    console.error("❌ Backend Error:", err);
+    
+    const status = err.status || 500;
+    return res.status(status).json({
+        success: false,
+        time: currentDateTime(),
+        message: err.message || "Internal Server Error",
+        error: process.env.APP_NODE_ENV === 'production' ? "Server Error" : err.message
+    });
 });
 
 export default app;
