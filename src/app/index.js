@@ -35,26 +35,37 @@ if (process.env.APP_NODE_ENV !== 'production') {
     app.use(morgan('tiny'));
 }
 
-// 🚀 ZERO-FAILURE CORS HANDLER (Manual Implementation)
+// 🚀 ROBUST CORS HANDLER WITH DIAGNOSTICS
 app.use((req, res, next) => {
     const origin = req.headers.origin;
-    const trustsTalentSwype = origin && (
-        origin.endsWith('.talentswype.com') || 
-        origin === 'https://talentswype.com' ||
-        origin.includes('localhost')
+    const isTalentSwype = origin && (
+        origin.includes('talentswype.com') || 
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
     );
 
-    if (trustsTalentSwype) {
+    if (isTalentSwype) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization, Accept');
+        res.setHeader('Access-Control-Max-Age', '86400'); // Cache for 24h
     }
 
     // Handle Preflight
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        if (isTalentSwype) {
+            return res.status(200).end();
+        }
+        // Even if not trusted, we must return a clean response for preflight to see the failure
+        return res.status(204).end();
     }
+    
+    // Log for debugging (Only for TalentSwype domains to avoid noise)
+    if (isTalentSwype) {
+        console.log(`[CORS DEBUG] ${req.method} from ${origin} - Allowed: ${isTalentSwype}`);
+    }
+    
     next();
 });
 
@@ -86,10 +97,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", ServerStatus.getServerLoadInfo, (req, res) => {
     const uptime = ServerStatus.calculateUptime();
     const serverLoadInfo = req.serverLoadInfo;
+    const currentOrigin = req.headers.origin || "No Origin Provided";
+    
     res.status(200).send({
         success: true,
-        message: "Talentswype Backend!",
-        dateTime: new Date().toLocaleString(),
+        message: "Talentswype Backend Diagnostic Active",
+        origin_detected: currentOrigin,
         connectedClient: process.env.CLIENT_BASE_URL,
         systemStatus: {
             uptime: `${uptime}s`,
