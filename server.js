@@ -1,3 +1,4 @@
+import './src/configs/dotenv.js';
 import app from './src/app/index.js';
 import logger from './src/middleware/winston.logger.js';
 import connectDatabase from './src/database/connect.mongo.db.js';

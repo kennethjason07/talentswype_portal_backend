@@ -11,10 +11,15 @@ const corsOptions = {
 			'https://slanster-dashboard.vercel.app',
 			'https://slanster-admin.vercel.app',
 			'https://talentswype.com',
-			'*',
 		].filter(Boolean);
 
-		if (dynamicAllowedOrigins.indexOf(origin) !== -1 || !origin) {
+		// Trust any TalentSwype subdomain as a fail-safe
+		const isTalentSwype = origin && (
+			origin.endsWith('.talentswype.com') || 
+			origin === 'https://talentswype.com'
+		);
+
+		if (dynamicAllowedOrigins.indexOf(origin) !== -1 || !origin || isTalentSwype) {
 			callback(null, true);
 		} else {
 			callback(new Error('Not allowed by CORS origin'));

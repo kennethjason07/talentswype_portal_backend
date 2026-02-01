@@ -1,3 +1,5 @@
+import './configs/dotenv.js';
+import './dotenv.js';
 import express from 'express';
 import favicon from 'serve-favicon';
 import crossOrigin from 'cors';
@@ -39,11 +41,11 @@ if (process.env.APP_NODE_ENV !== 'production') {
     app.use(morgan('tiny'));
 }
 
+// Allow cross-origin resource sharing (Moved up for preflight reliability)
+app.use(crossOrigin(corsOptions));
+
 // Secure HTTP headers setting middleware
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
-
-// Allow cross-origin resource sharing
-app.use(crossOrigin(corsOptions));
 
 // Parse cookies from requests
 app.use(cookieParser());
