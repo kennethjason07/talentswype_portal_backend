@@ -1,7 +1,6 @@
 import '../configs/dotenv.js';
 import express from 'express';
 import favicon from 'serve-favicon';
-import crossOrigin from 'cors';
 import cookieParser from 'cookie-parser';
 import appRoot from 'app-root-path';
 import bodyParser from 'body-parser';
@@ -10,7 +9,6 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 
 // Import application middleware 
-import corsOptions from '../configs/cors.config.js';
 import * as ServerStatus from '../services/serverInfo.service.js'
 import currentDateTime from '../libs/current.date.time.js';
 
@@ -37,8 +35,28 @@ if (process.env.APP_NODE_ENV !== 'production') {
     app.use(morgan('tiny'));
 }
 
-// Allow cross-origin resource sharing (Moved up for preflight reliability)
-app.use(crossOrigin(corsOptions));
+// 🚀 ZERO-FAILURE CORS HANDLER (Manual Implementation)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const trustsTalentSwype = origin && (
+        origin.endsWith('.talentswype.com') || 
+        origin === 'https://talentswype.com' ||
+        origin.includes('localhost')
+    );
+
+    if (trustsTalentSwype) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    }
+
+    // Handle Preflight
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
 
 // Secure HTTP headers setting middleware
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
