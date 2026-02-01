@@ -1,304 +1,211 @@
-# Admin Account Creation Script
+# 🧪 Testing Scripts
 
-## 📋 Overview
+This directory contains utility scripts for testing the email automation system.
 
-This script creates 3 admin accounts directly in the MongoDB database with pre-verified emails and ADMIN privileges.
+---
 
-## 👥 Admin Accounts
+## 📁 Available Scripts
 
-| Email                  | Password       | Username    |
-| ---------------------- | -------------- | ----------- |
-| admin1@talentswype.com | `X9@pL7!QeT2#` | Admin One   |
-| admin2@talentswype.com | `mR4$Zk8^A!Wc` | Admin Two   |
-| admin3@talentswype.com | `7B!f@2YQ#LxP` | Admin Three |
+### 1. **`create-test-users.js`**
 
-## 👥 Scripts Available
+Creates test users with different signup dates to test email automation.
 
-| Script            | Purpose                                                     |
-| ----------------- | ----------------------------------------------------------- |
-| `createAdmins.js` | Creates 3 default admin accounts.                           |
-| `clearData.js`    | Deletes ALL documents from all collections in the database. |
-
-## 🚀 How to Run
-
-### On Local Machine (Development)
+**Usage:**
 
 ```bash
-# Navigate to backend directory
-cd c:\Users\kened\Desktop\slanster-frontend\backendslanster
-
-# Run admin creation script
-node scripts/createAdmins.js
-
-# Run data clearing script (⚠️ BE CAREFUL)
-node scripts/clearData.js
+node scripts/create-test-users.js
 ```
 
-### On GCP Server (Production)
+**What it does:**
+
+- Creates 9 test users (5 seekers + 4 HR)
+- Sets different signup dates (today, 3 days ago, 7 days ago, 14 days ago)
+- Includes edge cases (unsubscribed, already received emails)
+- Auto-verifies emails for easy testing
+
+**Test Users Created:**
+
+| Email                                      | Type   | Days Ago | Expected Behavior             |
+| ------------------------------------------ | ------ | -------- | ----------------------------- |
+| `seeker.today@test.talentswype.com`        | Seeker | 0        | Welcome email immediately     |
+| `seeker.day3@test.talentswype.com`         | Seeker | 3        | Day 3 email at 10 AM IST      |
+| `seeker.day7@test.talentswype.com`         | Seeker | 7        | Day 7 email at 10 AM IST      |
+| `seeker.old@test.talentswype.com`          | Seeker | 14       | No emails (too old)           |
+| `hr.today@test.talentswype.com`            | HR     | 0        | HR welcome email immediately  |
+| `hr.day3@test.talentswype.com`             | HR     | 3        | HR Day 3 email at 10 AM IST   |
+| `hr.day7@test.talentswype.com`             | HR     | 7        | HR Day 7 email at 10 AM IST   |
+| `seeker.unsubscribed@test.talentswype.com` | Seeker | 3        | No emails (unsubscribed)      |
+| `seeker.received@test.talentswype.com`     | Seeker | 3        | No Day 3 email (already sent) |
+
+**All passwords:** `Test@123`
+
+---
+
+### 2. **`cleanup-test-users.js`**
+
+Removes all test users from the database.
+
+**Usage:**
 
 ```bash
-# SSH into your GCP server
-gcloud compute ssh YOUR_INSTANCE_NAME --zone YOUR_ZONE
-
-# Navigate to backend directory
-cd /path/to/backendslanster
-
-# Run admin creation script
-node scripts/createAdmins.js
-
-# Run data clearing script (⚠️ BE CAREFUL)
-node scripts/clearData.js
+node scripts/cleanup-test-users.js
 ```
 
-## ✅ What the Script Does
+**What it does:**
 
-1. **Connects to MongoDB** using the `MONGO_URI` from `.env`
-2. **Checks for existing admins** - Won't create duplicates
-3. **Hashes passwords** using bcrypt (same as registration)
-4. **Creates admin users** with:
-   - `userType: "ADMIN"`
-   - `isEmailVerified: true` (auto-verified)
-   - No email verification token needed
-5. **Updates existing users** to ADMIN if they already exist
-6. **Displays summary** of all created/updated accounts
+- Deletes all users with `@test.talentswype.com` email domain
+- Safe to run multiple times
+- Shows count of deleted users
 
-## 📊 Expected Output
+---
 
-```
-╔════════════════════════════════════════════════════╗
-║     TalentSwype Admin Account Creation Script     ║
-╚════════════════════════════════════════════════════╝
+## 🧪 Testing Workflow
 
-🔌 Connecting to MongoDB...
-📍 MongoDB URI: mongodb://localhost:27017/slanster
-✅ Connected to MongoDB successfully!
+### **Step 1: Create Test Users**
 
-📝 Processing: admin1@talentswype.com
-   🔐 Hashing password...
-   ✅ Admin created successfully!
-   📧 Email: admin1@talentswype.com
-   👤 Username: Admin One
-   🔑 Password: X9@pL7!QeT2#
-
-📝 Processing: admin2@talentswype.com
-   🔐 Hashing password...
-   ✅ Admin created successfully!
-   📧 Email: admin2@talentswype.com
-   👤 Username: Admin Two
-   🔑 Password: mR4$Zk8^A!Wc
-
-📝 Processing: admin3@talentswype.com
-   🔐 Hashing password...
-   ✅ Admin created successfully!
-   📧 Email: admin3@talentswype.com
-   👤 Username: Admin Three
-   🔑 Password: 7B!f@2YQ#LxP
-
-🎉 All admin accounts processed successfully!
-
-📋 Summary:
-─────────────────────────────────────────────────────
-
-✅ admin1@talentswype.com
-   Username: Admin One
-   Password: X9@pL7!QeT2#
-   User Type: ADMIN
-   Email Verified: true
-   Created: 2026-01-27T13:21:04.123Z
-
-✅ admin2@talentswype.com
-   Username: Admin Two
-   Password: mR4$Zk8^A!Wc
-   User Type: ADMIN
-   Email Verified: true
-   Created: 2026-01-27T13:21:04.456Z
-
-✅ admin3@talentswype.com
-   Username: Admin Three
-   Password: 7B!f@2YQ#LxP
-   User Type: ADMIN
-   Email Verified: true
-   Created: 2026-01-27T13:21:04.789Z
-
-─────────────────────────────────────────────────────
-
-🔐 Login URLs:
-   Development: http://localhost:3000/auth
-   Production:  https://portal.talentswype.com/auth
-
-🔌 Database connection closed.
+```bash
+node scripts/create-test-users.js
 ```
 
-## 🔍 Verify Admins Were Created
+### **Step 2: Verify Welcome Emails**
 
-### Using MongoDB Compass or Shell
+Check your email inbox for:
+
+- `seeker.today@test.talentswype.com` → Should receive seeker welcome email
+- `hr.today@test.talentswype.com` → Should receive HR welcome email
+
+### **Step 3: Wait for Scheduler or Trigger Manually**
+
+The scheduler runs every hour at 10 AM IST. To test immediately:
+
+**Option A: Wait for next 10 AM IST**
+
+- Scheduler will automatically send Day 3 and Day 7 emails
+
+**Option B: Manually trigger (for development)**
 
 ```javascript
-// Connect to your database
-use slanster
-
-// Find all admin users
-db.users.find({ userType: "ADMIN" }).pretty()
-
-// Should show 3 admin accounts
+// In your code, temporarily change the cron schedule to run every minute
+// scheduler.service.js
+cron.schedule('* * * * *', async () => { ... }); // Every minute instead of daily
 ```
 
-### Using the API
+### **Step 4: Verify Emails Sent**
+
+Check that these users received emails:
+
+- ✅ `seeker.day3@test.talentswype.com` → Day 3 email
+- ✅ `seeker.day7@test.talentswype.com` → Day 7 email
+- ✅ `hr.day3@test.talentswype.com` → HR Day 3 email
+- ✅ `hr.day7@test.talentswype.com` → HR Day 7 email
+
+### **Step 5: Verify Filtering Works**
+
+Check that these users did NOT receive emails:
+
+- ❌ `seeker.unsubscribed@test.talentswype.com` (unsubscribed)
+- ❌ `seeker.received@test.talentswype.com` (already received)
+- ❌ `seeker.old@test.talentswype.com` (too old)
+
+### **Step 6: Test Unsubscribe**
+
+1. Open any email
+2. Click "unsubscribe here" link
+3. Verify redirect to `/unsubscribe?token=XXX`
+4. Check database: `emailUnsubscribed` should be `true`
+5. Verify no more emails are sent to that user
+
+### **Step 7: Verify UTM Tracking**
+
+1. Click any link in the emails
+2. Check URL contains UTM parameters:
+   ```
+   ?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=browse_jobs_cta
+   ```
+3. Check Google Analytics for the session
+
+### **Step 8: Clean Up**
 
 ```bash
-# Login with admin credentials
-POST https://api.talentswype.com/api/v1/loginUserWithEmailPassword
+node scripts/cleanup-test-users.js
+```
+
+---
+
+## 📊 Monitoring Test Results
+
+### **Check Server Logs**
+
+Look for these messages:
+
+```
+✅ Email sent to seeker.day3@test.talentswype.com
+📧 Sending Day 3 email to seeker.day3@test.talentswype.com (Applications: 0)
+🔍 [Seeker Day 3] Found 1 eligible users
+```
+
+### **Check Database**
+
+```javascript
+// MongoDB query to check email logs
+db.users
+  .find({
+    email: "seeker.day3@test.talentswype.com",
+  })
+  .pretty();
+
+// Should show:
 {
-  "email": "admin1@talentswype.com",
-  "password": "X9@pL7!QeT2#"
+  emailAutomationLog: [
+    {
+      emailType: "seeker",
+      emailNumber: 2,
+      sentAt: ISODate("2026-01-31T04:30:00.000Z"),
+    },
+  ];
 }
-
-# Should return a token
 ```
 
-## 🛡️ Security Features
+---
 
-1. ✅ **Passwords are hashed** using bcrypt (10 salt rounds)
-2. ✅ **Email pre-verified** - No verification email needed
-3. ✅ **ADMIN user type** - Full admin privileges
-4. ✅ **Duplicate prevention** - Won't create if email already exists
-5. ✅ **Secure passwords** - Complex passwords with special characters
+## 🐛 Troubleshooting
 
-## ⚠️ Important Notes
+### **Issue: No emails received**
 
-### 1. Environment Variables
+**Check:**
 
-Make sure your `.env` file has the correct `MONGO_URI`:
+1. Is the server running? `npm run dev`
+2. Are email credentials configured? Check `.env`
+3. Is the scheduler running? Check logs for cron messages
+4. Is it 10 AM IST? Scheduler only runs at that time
 
-**Development:**
+**Solution:**
 
-```env
-MONGO_URI=mongodb://localhost:27017/slanster
-```
+- Temporarily change cron schedule to `* * * * *` (every minute)
+- Check SMTP settings in `.env`
+- Verify `sendEmail` function is working
 
-**Production:**
+---
 
-```env
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/slanster
-```
-
-### 2. Run Only Once
-
-This script is designed to be run once to create the admin accounts. Running it multiple times is safe (it won't create duplicates), but unnecessary.
-
-### 3. Password Security
-
-⚠️ **IMPORTANT**: These passwords are stored in the script for initial setup. After first login, each admin should:
-
-1. Login with the provided credentials
-2. Change their password immediately
-3. Use a password manager for the new password
-
-### 4. Production Deployment
-
-When deploying to production:
-
-- Run this script on the production server
-- Or run locally with production database connection
-- Verify admins can login at https://portal.talentswype.com/auth
-
-## 🔧 Troubleshooting
-
-### Error: "Cannot find module 'mongoose'"
+## 🚀 Quick Commands
 
 ```bash
-# Install dependencies
-npm install
+# Create test users
+node scripts/create-test-users.js
+
+# Clean up test users
+node scripts/cleanup-test-users.js
+
+# Check test users in MongoDB
+mongosh
+use your_database_name
+db.users.find({ email: /@test\.talentswype\.com/ }).pretty()
+
+# Count test users
+db.users.countDocuments({ email: /@test\.talentswype\.com/ })
 ```
 
-### Error: "MONGO_URI not found"
+---
 
-```bash
-# Check your .env file
-cat .env | grep MONGO_URI
-
-# Make sure it's set correctly
-```
-
-### Error: "Connection refused"
-
-```bash
-# Check if MongoDB is running
-# For local MongoDB:
-sudo systemctl status mongod
-
-# For MongoDB Atlas:
-# Check your connection string and whitelist your IP
-```
-
-### Admins not showing as ADMIN type
-
-```bash
-# Run the script again - it will update existing users
-node scripts/createAdmins.js
-```
-
-## 📝 Customization
-
-### Add More Admins
-
-Edit `scripts/createAdmins.js` and add to the `adminAccounts` array:
-
-```javascript
-const adminAccounts = [
-  // ... existing admins
-  {
-    username: "Admin Four",
-    email: "admin4@talentswype.com",
-    password: "YourSecurePassword123!",
-    mobileNumber: "9999999994",
-    college: "TalentSwype Admin",
-  },
-];
-```
-
-### Change Admin Details
-
-Modify the existing entries in the `adminAccounts` array.
-
-## 🎯 Next Steps
-
-After running the script:
-
-1. ✅ Verify admins can login
-2. ✅ Test admin dashboard access
-3. ✅ Have each admin change their password
-4. ✅ Set up 2FA if available
-5. ✅ Document admin credentials securely (password manager)
-
-## 📞 Support
-
-If you encounter issues:
-
-1. Check MongoDB connection
-2. Verify .env file configuration
-3. Check server logs: `pm2 logs backend`
-4. Verify database permissions
-5. Check if users collection exists
-
-## 🔐 Credentials Summary
-
-**Save these credentials securely!**
-
-```
-Admin 1:
-Email: admin1@talentswype.com
-Password: X9@pL7!QeT2#
-
-Admin 2:
-Email: admin2@talentswype.com
-Password: mR4$Zk8^A!Wc
-
-Admin 3:
-Email: admin3@talentswype.com
-Password: 7B!f@2YQ#LxP
-
-Login URL: https://portal.talentswype.com/auth
-```
-
-⚠️ **Remember to change these passwords after first login!**
+**Last Updated**: January 31, 2026  
+**Status**: ✅ Ready for Testing

@@ -3,7 +3,7 @@
  * Email 1: Welcome Email (Immediate)
  * Trigger: User signs up as Job Seeker
  */
-export function welcomeEmailTemplate(firstName) {
+export function welcomeEmailTemplate(firstName, unsubscribeToken = '') {
     const subject = `Welcome to TalentSwype, ${firstName}! No more fake jobs or ignored applications 🚀`;
     const text = `Hi ${firstName},
 
@@ -18,9 +18,9 @@ Here's what makes us different:
 ✅ Ready to get started?
 Browse quality job openings and apply to roles that match your skills and goals.
 
-Browse Jobs Now: http://portal.talentswype.com/jobs
+Browse Jobs Now: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=text_link
 
-Need help? Chat with us on WhatsApp: https://wa.me/919389557198?text=Hi%20I%20need%20help
+Need help? Chat with us on WhatsApp: https://wa.me/919389557198?text=Hi%20I%20need%20help&utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=whatsapp_support
 
 Best regards,
 
@@ -28,7 +28,7 @@ Shantanu Nitin Kulkaarni
 Founder
 TalentSwype
 
-This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can unsubscribe here: portal.talentswype.com/unsubscribe
+This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can unsubscribe here: http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}
 TalentSwype | Pune, India`;
 
     const html = `
@@ -58,12 +58,12 @@ TalentSwype | Pune, India`;
     <p>Browse quality job openings and apply to roles that match your skills and goals.</p>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/jobs" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse Jobs Now</a>
+        <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=browse_jobs_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse Jobs Now</a>
     </div>
 
-    <p><em>Link: <a href="http://portal.talentswype.com/jobs" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
+    <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
 
-    <p>Need help? <a href="https://wa.me/919389557198?text=Hi%20I%20need%20help" style="font-weight: bold; color: #007bff;">Chat with us on WhatsApp</a></p>
+    <p>Need help? <a href="https://wa.me/919389557198?text=Hi%20I%20need%20help&utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=whatsapp_support" style="font-weight: bold; color: #007bff;">Chat with us on WhatsApp</a></p>
 
     <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
 
@@ -76,7 +76,7 @@ TalentSwype | Pune, India`;
     <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
 
     <p style="font-size: 12px; color: #777; text-align: center;">
-        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
         <em>TalentSwype | Pune, India</em>
     </p>
 
@@ -91,7 +91,7 @@ TalentSwype | Pune, India`;
  * Email 2: First Application Push (Day 3)
  * Trigger: 72 hours after signup WHERE job_applications = 0
  */
-export function firstApplicationPushTemplate(firstName) {
+export function firstApplicationPushTemplate(firstName, unsubscribeToken = '') {
     const subject = `${firstName}, your perfect job match is waiting 💼`;
     const text = `Hi ${firstName},
 
@@ -104,7 +104,7 @@ We've handpicked these jobs for you:
 - Job Title 2 — Company Name — Location
 - Job Title 3 — Company Name — Location
 
-Browse All Jobs: http://portal.talentswype.com/jobs
+Browse All Jobs: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=text_link
 
 💡 Application Tip:
 Quality matters. When you apply, mention why YOU are the right fit for the role — not just that you meet the requirements. Specificity wins.
@@ -117,7 +117,7 @@ How our screening works:
 
 No black hole applications. Just real conversations.
 
-Apply to Your First Job: http://portal.talentswype.com/jobs
+Apply to Your First Job: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_first_job
 
 Cheers,
 Team TalentSwype`;
@@ -151,10 +151,10 @@ Team TalentSwype`;
     </div>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/jobs" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse All Jobs</a>
+        <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=browse_all_jobs_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse All Jobs</a>
     </div>
 
-    <p><em>Link: <a href="http://portal.talentswype.com/jobs" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
+    <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
 
     <div style="background-color: #eef7ff; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0;">
         <p style="margin: 0;"><strong>💡 Application Tip:</strong></p>
@@ -172,13 +172,20 @@ Team TalentSwype`;
     <p>No black hole applications. Just real conversations.</p>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/jobs" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Apply to Your First Job</a>
+        <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_first_job_cta" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Apply to Your First Job</a>
     </div>
 
-    <p><em>Link: <a href="http://portal.talentswype.com/jobs" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
+    <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
 
     <p>Cheers,</p>
     <p>Team TalentSwype</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>TalentSwype | Pune, India</em>
+    </p>
 
 </body>
 </html>
@@ -190,7 +197,7 @@ Team TalentSwype`;
  * Email 3: Engagement & Tips (Day 6)
  * Trigger: 6 days after signup → Send to all seekers
  */
-export function engagementTipsTemplate(firstName, applicationsCount, newMatchesCount) {
+export function engagementTipsTemplate(firstName, applicationsCount, newMatchesCount, unsubscribeToken = '') {
     const subject = `5 insider tips to land interviews faster 🎯`;
     const text = `Hi ${firstName},
 
@@ -214,7 +221,7 @@ Your activity this week:
 - Applications sent: ${applicationsCount}
 - New job matches: ${newMatchesCount}
 
-Explore More Opportunities: http://portal.talentswype.com/jobs
+Explore More Opportunities: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=text_link
 
 Keep going — the right opportunity is closer than you think!
 
@@ -268,14 +275,21 @@ Team TalentSwype`;
     </div>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/jobs" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Explore More Opportunities</a>
+        <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=explore_opportunities_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Explore More Opportunities</a>
     </div>
 
-    <p><em>Link: <a href="http://portal.talentswype.com/jobs" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
+    <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
 
     <p>Keep going — the right opportunity is closer than you think!</p>
 
     <p>Team TalentSwype</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>TalentSwype | Pune, India</em>
+    </p>
 
 </body>
 </html>

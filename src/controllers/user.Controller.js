@@ -91,19 +91,22 @@ export async function registerUser(req, res) {
         user.emailVerificationTokenExpires = tokenExpires;
 
         // Send Verification Email
-        const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
+        const employerUrl = process.env.HR_CLIENT_BASE_URL || "https://employer.talentswype.com";
+        const candidateUrl = process.env.CLIENT_BASE_URL || "https://portal.talentswype.com";
+        const clientUrl = user.userType === "HR" ? employerUrl : candidateUrl;
+
         const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, username, clientUrl);
         await sendEmail(email, subject, text, html);
 
         // Send Welcome Email (Immediate) for Job Seekers
         if (user.userType === "USER") {
             const firstName = username ? username.split(" ")[0] : "Job Seeker";
-            const welcomeEmail = welcomeEmailTemplate(firstName);
+            const welcomeEmail = welcomeEmailTemplate(firstName, unsubscribeToken);
             await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
         } else if (user.userType === "HR") {
             // Send Welcome Email (Immediate) for HR
             const firstName = username ? username.split(" ")[0] : "HR Partner";
-            const welcomeEmail = welcomeHRTemplate(firstName);
+            const welcomeEmail = welcomeHRTemplate(firstName, unsubscribeToken);
             await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
         }
 
@@ -591,7 +594,10 @@ export const resendVerificationEmail = async (req, res) => {
         await user.save();
 
         // Send new verification email
-        const clientUrl = process.env.CLIENT_BASE_URL || "http://localhost:3000";
+        const employerUrl = process.env.HR_CLIENT_BASE_URL || "https://employer.talentswype.com";
+        const candidateUrl = process.env.CLIENT_BASE_URL || "https://portal.talentswype.com";
+        const clientUrl = user.userType === "HR" ? employerUrl : candidateUrl;
+
         const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, user.username, clientUrl);
         await sendEmail(email, subject, text, html);
 

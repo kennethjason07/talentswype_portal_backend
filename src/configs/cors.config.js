@@ -1,16 +1,20 @@
-const allowedOrigins = [
-	'http://localhost:3000',
-	'http://localhost:3001',
-	'https://portal.talentswype.com',
-	'https://www.slanster.com',
-	'https://slanster-dashboard.vercel.app',
-	'https://slanster-admin.vercel.app',
-	'*',
-];
-
 const corsOptions = {
 	origin: (origin, callback) => {
-		if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+		const dynamicAllowedOrigins = [
+			'http://localhost:3000',
+			'http://localhost:3001',
+			process.env.CLIENT_BASE_URL,
+			process.env.HR_CLIENT_BASE_URL,
+			'https://portal.talentswype.com',
+			'https://employer.talentswype.com',
+			'https://www.slanster.com',
+			'https://slanster-dashboard.vercel.app',
+			'https://slanster-admin.vercel.app',
+			'https://talentswype.com',
+			'*',
+		].filter(Boolean);
+
+		if (dynamicAllowedOrigins.indexOf(origin) !== -1 || !origin) {
 			callback(null, true);
 		} else {
 			callback(new Error('Not allowed by CORS origin'));

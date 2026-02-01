@@ -109,7 +109,7 @@ async function checkDay3Trigger() {
                 console.log(`📧 Sending Day 3 email to ${user.email} (Applications: 0)`);
                 
                 const firstName = user.username ? user.username.split(" ")[0] : "Candidate";
-                const { subject, text, html } = firstApplicationPushTemplate(firstName);
+                const { subject, text, html } = firstApplicationPushTemplate(firstName, user.unsubscribeToken);
                 
                 await sendEmail(user.email, subject, text, html);
                 await logEmailSent(user, "seeker", 2);
@@ -138,7 +138,7 @@ async function checkDay7Trigger() {
             const applicationsCount = await jobApplicationModel.countDocuments({ applicant: user._id });
             const newMatchesCount = Math.floor(Math.random() * (10 - 3 + 1)) + 3; 
 
-            const { subject, text, html } = engagementTipsTemplate(firstName, applicationsCount, newMatchesCount);
+            const { subject, text, html } = engagementTipsTemplate(firstName, applicationsCount, newMatchesCount, user.unsubscribeToken);
             
             await sendEmail(user.email, subject, text, html);
             await logEmailSent(user, "seeker", 3);
@@ -163,7 +163,7 @@ async function checkHRDay3Trigger() {
             console.log(`📧 Sending HR Day 3 email to ${user.email} (Jobs Posted: ${jobCount})`);
             
             const firstName = user.username ? user.username.split(" ")[0] : "HR";
-            const { subject, text, html } = jobPostingTipsTemplate(firstName, hasPostedJob);
+            const { subject, text, html } = jobPostingTipsTemplate(firstName, hasPostedJob, user.unsubscribeToken);
             
             await sendEmail(user.email, subject, text, html);
             await logEmailSent(user, "hr", 2);
@@ -205,7 +205,7 @@ async function checkHRDay7Trigger() {
             const hasActivity = jobsPosted > 0 || candidatesInReview > 0;
             const stats = { jobsPosted, candidatesInReview, profilesShortlisted };
 
-            const { subject, text, html } = hiringBestPracticesTemplate(firstName, hasActivity, stats);
+            const { subject, text, html } = hiringBestPracticesTemplate(firstName, hasActivity, stats, user.unsubscribeToken);
             
             await sendEmail(user.email, subject, text, html);
             await logEmailSent(user, "hr", 3);

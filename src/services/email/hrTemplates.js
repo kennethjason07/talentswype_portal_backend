@@ -3,7 +3,7 @@
  * Email 1: Welcome Email (Immediate)
  * Trigger: User signs up as HR/Employer
  */
-export function welcomeHRTemplate(firstName) {
+export function welcomeHRTemplate(firstName, unsubscribeToken = '') {
     const subject = `Welcome to TalentSwype, ${firstName} — Quality hiring starts here 🎯`;
     const text = `Hi ${firstName},
 
@@ -22,7 +22,7 @@ Why top companies choose us:
 2. Our team screens candidates
 3. Review only qualified matches
 
-Post Your First Job: http://portal.talentswype.com/post-job
+Post Your First Job: http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_welcome&utm_content=text_link
 
 What to expect:
 - Job goes live within 24 hours of posting
@@ -78,7 +78,7 @@ P.S. We'll send you hiring best practices and tips over the next few days to hel
     </ol>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/post-job" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your First Job</a>
+        <a href="http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_welcome&utm_content=post_job_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your First Job</a>
     </div>
 
     <p><strong>What to expect:</strong></p>
@@ -99,6 +99,13 @@ P.S. We'll send you hiring best practices and tips over the next few days to hel
         P.S. We'll send you hiring best practices and tips over the next few days to help you get the most out of our platform.
     </p>
 
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=hr_welcome&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>TalentSwype | Pune, India</em>
+    </p>
+
 </body>
 </html>
     `;
@@ -109,7 +116,7 @@ P.S. We'll send you hiring best practices and tips over the next few days to hel
  * Email 2: Job Posting Tips & Screening Process (Day 3)
  * Trigger: 72 hours after signup -> Send to all HR
  */
-export function jobPostingTipsTemplate(firstName, hasPostedJob) {
+export function jobPostingTipsTemplate(firstName, hasPostedJob, unsubscribeToken = '') {
     const subject = `How we filter 100 resumes down to your top 5 🔍`;
     const text = `Hi ${firstName},
 
@@ -142,7 +149,7 @@ The result? Only 5-10% of applicants make it to your inbox. But those who do are
 
 ${hasPostedJob ? 
 "Your job is currently in screening. We'll notify you as soon as we have qualified candidates ready for review!" : 
-"Post Your First Job: http://portal.talentswype.com/post-job\nLet us do the heavy lifting. You focus on making the final decision."}
+"Post Your First Job: http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_day3&utm_content=text_link\nLet us do the heavy lifting. You focus on making the final decision."}
 
 Team TalentSwype`;
 
@@ -151,8 +158,8 @@ Team TalentSwype`;
         <p style="margin: 0; color: #155724;"><strong>Your job is currently in screening.</strong> We'll notify you as soon as we have qualified candidates ready for review!</p>
     </div>` : `
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/post-job" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your First Job</a>
-        <p style="margin-top: 10px; font-size: 14px;"><em>Link: <a href="http://portal.talentswype.com/post-job" style="color: #007bff;">portal.talentswype.com/post-job</a></em></p>
+        <a href="http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_day3&utm_content=post_job_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your First Job</a>
+        <p style="margin-top: 10px; font-size: 14px;"><em>Link: <a href="http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_day3&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/post-job</a></em></p>
     </div>
     <p>Let us do the heavy lifting. You focus on making the final decision.</p>`;
 
@@ -214,6 +221,13 @@ Team TalentSwype`;
 
     <p>Team TalentSwype</p>
 
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=hr_day3&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>TalentSwype | Pune, India</em>
+    </p>
+
 </body>
 </html>
     `;
@@ -224,7 +238,7 @@ Team TalentSwype`;
  * Email 3: Hiring Best Practices (Day 7)
  * Trigger: 7 days after signup -> Send to all HR
  */
-export function hiringBestPracticesTemplate(firstName, hasActivity, stats = { jobsPosted: 0, candidatesInReview: 0, profilesShortlisted: 0 }) {
+export function hiringBestPracticesTemplate(firstName, hasActivity, stats = { jobsPosted: 0, candidatesInReview: 0, profilesShortlisted: 0 }, unsubscribeToken = '') {
     const subject = `5 ways to hire faster (without sacrificing quality) ⚡`;
     const text = `Hi ${firstName},
 
@@ -258,7 +272,7 @@ Your progress:
 
 ${hasActivity ? 
 "Great momentum! Keep the process moving and you'll have your quality hires soon." : 
-"We noticed you haven't posted a job yet. Need help getting started?\n\nPost Your Job Now: http://portal.talentswype.com/post-job\n\nOr reply to this email and our team will personally assist you."}
+"We noticed you haven't posted a job yet. Need help getting started?\n\nPost Your Job Now: http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_day7&utm_content=text_link\n\nOr reply to this email and our team will personally assist you."}
 
 Happy hiring,
 
@@ -268,7 +282,7 @@ Shantanu & Team TalentSwype`;
     <p><strong>Great momentum!</strong> Keep the process moving and you'll have your quality hires soon.</p>` : `
     <p>We noticed you haven't posted a job yet. Need help getting started?</p>
     <div style="text-align: center; margin: 30px 0;">
-        <a href="http://portal.talentswype.com/post-job" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your Job Now</a>
+        <a href="http://portal.talentswype.com/post-job?utm_source=email&utm_medium=automation&utm_campaign=hr_day7&utm_content=post_job_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Post Your Job Now</a>
     </div>
     <p>Or reply to this email and our team will personally assist you.</p>`;
 
@@ -320,6 +334,13 @@ Shantanu & Team TalentSwype`;
 
     <p>Happy hiring,</p>
     <p>Shantanu & Team TalentSwype</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>This email was sent to you because you signed up for TalentSwype. If you'd like to stop receiving these emails, you can <a href="http://portal.talentswype.com/unsubscribe?token=${unsubscribeToken}&utm_source=email&utm_medium=automation&utm_campaign=hr_day7&utm_content=unsubscribe" style="color: #777;">unsubscribe here</a>.</em><br>
+        <em>TalentSwype | Pune, India</em>
+    </p>
 
 </body>
 </html>
