@@ -18,6 +18,7 @@ router.route('/jobs').get(UserAuth, JobController.getJobs);
 router.route('/jobs/:jobId').get(UserAuth, JobController.getJobById);
 router.route('/applications/me').get(UserAuth, JobController.getMyApplications);
 router.route('/applications/job/:jobId').get(UserAuth, allowRoles("HR", "ADMIN"), JobController.getApplicantsForJob);
+router.route('/jobs/:jobId/matching-candidates').get(UserAuth, allowRoles("HR", "ADMIN"), JobController.getMatchingCandidates);
 router.route('/admin/jobs').get(UserAuth, allowRoles("ADMIN"), JobController.getAllJobsForAdmin);
 
 // PUT ROUTES

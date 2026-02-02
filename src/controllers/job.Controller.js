@@ -578,3 +578,113 @@ export const withdrawApplication = async (req, res) => {
         });
     }
 };
+
+export const getMatchingCandidates = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+        const { userId, userType } = req.user;
+
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Job ID format",
+            });
+        }
+
+        // Find the job
+        const job = await jobModel.findById(jobId).select("+publishBy");
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found",
+            });
+        }
+
+        // HR can only view matching candidates for their own job posts
+        const jobOwnerId = job.publishBy ? job.publishBy.toString() : null;
+        if (userType === "HR" && jobOwnerId !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "HR can only view matching candidates for their own jobs",
+            });
+        }
+
+        // 1. Get List of Applicants to Exclude
+        const existingApplications = await jobApplicationModel.find({ job: jobId }).select("applicant");
+        const applicantIds = existingApplications.map(app => app.applicant);
+
+        // 2. Identify keyskills
+        const skills = job.key_skills || [];
+        if (skills.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                message: "No specific skills defined for this job to match candidates.",
+                data: [],
+            });
+        }
+
+        // 3. Find Users with matching skills in their UserProfile
+        // We need to query UserProfile for skills match, then populate User details
+        // Case-insensitive regex match for each skill
+        const skillRegexes = skills.map(skill => new RegExp(skill, "i"));
+
+        // Find profiles that have ANY of the skills
+        // And ensure the user is NOT in applicantIds
+        // Also ensure userType is strictly 'USER' (candidate) - filtering done via populate match or secondary query
+         
+        // Option: Aggregate or simple find on UserProfile
+        // UserProfile has: user (ref), skills: [{ skill: String }]
+        
+        // We want profiles where skills.skill matches any of skillRegexes
+        // AND user is not in applicantIds
+        
+        // However, UserProfile schema has `user` ref. We need to filter based on that `user` field ref too.
+        
+        // Let's use aggregation for better performance and filtering
+        // We need to `lookup` the `User` collection to check userType='USER' and exclude applicants simultaneously if we want (or handle applicant exclusion by ID list).
+        
+        // Simplified approach: matches in UserProfile -> populate User -> filter
+        
+        const matchedProfiles = await mongoose.model("UserProfile").find({
+            "skills.skill": { $in: skillRegexes },
+            "user": { $nin: applicantIds }
+        }).populate({
+            path: "user",
+            match: { userType: "USER" }, // Ensure it's a candidate
+            select: "username email mobileNumber college"
+        });
+
+        // Filter out profiles where populate failed (e.g. user was not USER type or deleted)
+        const candidates = matchedProfiles
+            .filter(profile => profile.user)
+            .map(profile => ({
+                _id: profile.user._id, // Return User ID
+                username: profile.user.username,
+                email: profile.user.email,
+                mobileNumber: profile.user.mobileNumber,
+                college: profile.user.college,
+                profileId: profile._id,
+                skills: profile.skills, // Send all skills or just matched ones? Sending all helps context.
+                // Highlight matched skills could be done on frontend
+                matchedSkills: profile.skills
+                   .filter(s => skillRegexes.some(r => r.test(s.skill)))
+                   .map(s => s.skill)
+            }));
+
+        res.status(200).json({
+            success: true,
+            count: candidates.length,
+            data: candidates
+        });
+
+    } catch (error) {
+        console.error("GET_MATCHING_CANDIDATES_ERROR:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching matching candidates: " + error.message,
+            debug: process.env.NODE_ENV === "development" ? error.stack : undefined
+        });
+    }
+};

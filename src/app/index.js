@@ -5,7 +5,6 @@ import cookieParser from 'cookie-parser';
 import appRoot from 'app-root-path';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 
 // Import application middleware 
