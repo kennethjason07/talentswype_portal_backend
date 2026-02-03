@@ -109,7 +109,14 @@ async function checkDay3Trigger() {
                 console.log(`📧 Sending Day 3 email to ${user.email} (Applications: 0)`);
                 
                 const firstName = user.username ? user.username.split(" ")[0] : "Candidate";
-                const { subject, text, html } = firstApplicationPushTemplate(firstName, user.unsubscribeToken);
+
+                // Fetch 3 most recent active jobs
+                const jobs = await jobModel.find({ publishStatus: 'active' })
+                    .sort({ createdAt: -1 })
+                    .limit(3)
+                    .select('position company location');
+
+                const { subject, text, html } = firstApplicationPushTemplate(firstName, jobs, user.unsubscribeToken);
                 
                 await sendEmail(user.email, subject, text, html);
                 await logEmailSent(user, "seeker", 2);
@@ -136,7 +143,11 @@ async function checkDay7Trigger() {
             
             // Get stats for the email
             const applicationsCount = await jobApplicationModel.countDocuments({ applicant: user._id });
-            const newMatchesCount = Math.floor(Math.random() * (10 - 3 + 1)) + 3; 
+            // Count new active jobs posted in the last 7 days
+            const newMatchesCount = await jobModel.countDocuments({ 
+                publishStatus: 'active',
+                createdAt: { $gte: moment().subtract(7, 'days').toDate() }
+            });
 
             const { subject, text, html } = engagementTipsTemplate(firstName, applicationsCount, newMatchesCount, user.unsubscribeToken);
             

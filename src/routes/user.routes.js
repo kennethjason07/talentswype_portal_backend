@@ -18,6 +18,7 @@ router.route('/resetPassword').post(UserAuth, UsersController.resetPassword);
 
 // GET ROUTES
 router.route('/getUser').get(UserAuth, UsersController.getUser);
+router.route('/profile').get(UserAuth, UsersController.getUserProfile);
 
 // PUT ROUTES
 router.route('/profile/update').put(UserAuth, UsersController.updateUserProfile);

@@ -61,6 +61,10 @@ TalentSwype | Pune, India`;
         <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=browse_jobs_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse Jobs Now</a>
     </div>
 
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="http://portal.talentswype.com/talentswypedashboard?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=dashboard_cta" style="background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Go to Dashboard</a>
+    </div>
+
     <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
 
     <p>Need help? <a href="https://wa.me/919389557198?text=Hi%20I%20need%20help&utm_source=email&utm_medium=automation&utm_campaign=seeker_welcome&utm_content=whatsapp_support" style="font-weight: bold; color: #007bff;">Chat with us on WhatsApp</a></p>
@@ -91,18 +95,49 @@ TalentSwype | Pune, India`;
  * Email 2: First Application Push (Day 3)
  * Trigger: 72 hours after signup WHERE job_applications = 0
  */
-export function firstApplicationPushTemplate(firstName, unsubscribeToken = '') {
+/**
+ * Email 2: First Application Push (Day 3)
+ * Trigger: 72 hours after signup WHERE job_applications = 0
+ */
+export function firstApplicationPushTemplate(firstName, jobs = [], unsubscribeToken = '') {
     const subject = `${firstName}, your perfect job match is waiting 💼`;
+    
+    let jobListText = "";
+    let jobListHtml = "";
+    let jobSectionHtml = "";
+
+    if (jobs && jobs.length > 0) {
+        // Generate Text List
+        jobListText = "We've handpicked these jobs for you:\n\n" + jobs.map(job => `- ${job.position} — ${job.company} — ${job.location}`).join("\n");
+        
+        // Generate HTML List
+        jobListHtml = jobs.map(job => `<li>${job.position} — ${job.company} — ${job.location}</li>`).join("");
+        
+        jobSectionHtml = `
+    <p><strong>We've handpicked these jobs for you:</strong></p>
+
+    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <ul style="margin: 0; padding-left: 20px;">
+            ${jobListHtml}
+        </ul>
+    </div>`;
+    } else {
+        // Fallback: No jobs fetched (should verify why, but show generic message)
+        jobListText = "We have hundreds of verified jobs waiting for you on the portal.";
+        
+        jobSectionHtml = `
+    <p><strong>We have hundreds of verified jobs waiting for you.</strong></p>
+
+    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0;">Log in now to see roles that match your profile.</p>
+    </div>`;
+    }
+
     const text = `Hi ${firstName},
 
 We hope you're settling in! Now it's time to find your next opportunity.
 
-We've handpicked these jobs for you:
-
-[Dynamic: Top 3 job matches based on location/preferences]
-- Job Title 1 — Company Name — Location
-- Job Title 2 — Company Name — Location
-- Job Title 3 — Company Name — Location
+${jobListText}
 
 Browse All Jobs: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=text_link
 
@@ -118,6 +153,8 @@ How our screening works:
 No black hole applications. Just real conversations.
 
 Apply to Your First Job: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_first_job
+
+Go to Dashboard: http://portal.talentswype.com/talentswypedashboard?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=dashboard_link
 
 Cheers,
 Team TalentSwype`;
@@ -139,16 +176,7 @@ Team TalentSwype`;
 
     <p>We hope you're settling in! Now it's time to find your next opportunity.</p>
 
-    <p><strong>We've handpicked these jobs for you:</strong></p>
-
-    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><em>[Dynamic: Top 3 job matches based on location/preferences]</em></p>
-        <ul style="margin: 0; padding-left: 20px;">
-            <li>Job Title 1 — Company Name — Location</li>
-            <li>Job Title 2 — Company Name — Location</li>
-            <li>Job Title 3 — Company Name — Location</li>
-        </ul>
-    </div>
+    ${jobSectionHtml}
 
     <div style="text-align: center; margin: 30px 0;">
         <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=browse_all_jobs_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Browse All Jobs</a>
@@ -173,6 +201,10 @@ Team TalentSwype`;
 
     <div style="text-align: center; margin: 30px 0;">
         <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_first_job_cta" style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Apply to Your First Job</a>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="http://portal.talentswype.com/talentswypedashboard?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=dashboard_cta" style="background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Go to Dashboard</a>
     </div>
 
     <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day3&utm_content=apply_text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>
@@ -222,6 +254,8 @@ Your activity this week:
 - New job matches: ${newMatchesCount}
 
 Explore More Opportunities: http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=text_link
+
+Go to Dashboard: http://portal.talentswype.com/talentswypedashboard?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=dashboard_link
 
 Keep going — the right opportunity is closer than you think!
 
@@ -276,6 +310,10 @@ Team TalentSwype`;
 
     <div style="text-align: center; margin: 30px 0;">
         <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=explore_opportunities_cta" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Explore More Opportunities</a>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="http://portal.talentswype.com/talentswypedashboard?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=dashboard_cta" style="background-color: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Go to Dashboard</a>
     </div>
 
     <p><em>Link: <a href="http://portal.talentswype.com/jobs?utm_source=email&utm_medium=automation&utm_campaign=seeker_day7&utm_content=text_link" style="color: #007bff;">portal.talentswype.com/jobs</a></em></p>

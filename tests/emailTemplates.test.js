@@ -13,11 +13,14 @@ describe('Candidate Email Templates', () => {
         expect(result.html).toContain('John');
     });
 
-    test('firstApplicationPushTemplate should include user name', () => {
-        const result = firstApplicationPushTemplate('Jane');
+    test('firstApplicationPushTemplate should include user name and dynamic jobs', () => {
+        const jobs = [{ position: 'Dev', company: 'Inc', location: 'Remote' }];
+        const result = firstApplicationPushTemplate('Jane', jobs);
         
         expect(result.subject).toContain('Jane');
         expect(result.html).toContain('Jane');
+        expect(result.html).toContain('Dev');
+        expect(result.html).toContain('Inc');
     });
 
     test('engagementTipsTemplate should include stats', () => {

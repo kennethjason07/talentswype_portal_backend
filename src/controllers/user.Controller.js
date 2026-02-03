@@ -72,13 +72,17 @@ export async function registerUser(req, res) {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
         // Create new user with generated password
+        // Create new user with generated password
+        // Normalize userType to uppercase to ensure consistency
+        const normalizedUserType = (userType || "USER").toUpperCase();
+        
         const user = new userModel({
             username,
             email,
             mobileNumber,
             college,
             password: hashedPassword,
-            userType: userType || "USER",
+            userType: normalizedUserType,
         });
 
 
@@ -95,19 +99,26 @@ export async function registerUser(req, res) {
         const candidateUrl = process.env.CLIENT_BASE_URL || "https://portal.talentswype.com";
         const clientUrl = user.userType === "HR" ? employerUrl : candidateUrl;
 
+        console.log(`📧 Sending verification email to ${email}`);
         const { subject, text, html } = emailVerificationTemplate(emailVerificationToken, username, clientUrl);
         await sendEmail(email, subject, text, html);
 
         // Send Welcome Email (Immediate) for Job Seekers
+        console.log(`🔍 Checking userType for Welcome Email: ${user.userType}`);
+        
         if (user.userType === "USER") {
+            console.log(`📧 Sending Welcome Job Seeker email to ${email}`);
             const firstName = username ? username.split(" ")[0] : "Job Seeker";
             const welcomeEmail = welcomeEmailTemplate(firstName, unsubscribeToken);
             await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
         } else if (user.userType === "HR") {
+            console.log(`📧 Sending Welcome HR email to ${email}`);
             // Send Welcome Email (Immediate) for HR
             const firstName = username ? username.split(" ")[0] : "HR Partner";
             const welcomeEmail = welcomeHRTemplate(firstName, unsubscribeToken);
             await sendEmail(email, welcomeEmail.subject, welcomeEmail.text, welcomeEmail.html);
+        } else {
+            console.warn(`⚠️ User type ${user.userType} not recognized for welcome email.`);
         }
 
         await user.save();
@@ -511,6 +522,31 @@ export const updateUserProfile = async (req, res) => {
     } catch (error) {
         console.error("Update Profile Error:", error);
         res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.user;
+
+        const user = await userModel.findById(userId).select("-password -emailVerificationToken -unsubscribeToken");
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const profile = await userProfileModel.findOne({ user: userId });
+
+        res.status(200).json({
+            success: true,
+            data: {
+                ...user.toObject(),
+                skills: profile ? profile.skills : [],
+                profileId: profile?._id
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };
 
