@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport({
  */
 export async function sendEmail(to, subject, text, html = null) {
     try {
+        console.log(`📨 Attempting to send email to: ${to} | User: ${process.env.EMAIL_USER ? 'Set' : 'MISSING'} | Pass: ${process.env.EMAIL_PASS ? 'Set' : 'MISSING'}`);
         const mailOptions = {
             from: `"TalentSwype" <${process.env.EMAIL_USER}>`,
             to,
@@ -27,10 +28,10 @@ export async function sendEmail(to, subject, text, html = null) {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log("✅ Email sent: ", info.messageId);
+        console.log("✅ Email sent successfully via Nodemailer! ID:", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
-        console.error("❌ Error sending email:", error);
+        console.error("❌ CRTICAL ERROR sending email:", error);
         return { success: false, error: error.message };
     }
 }
