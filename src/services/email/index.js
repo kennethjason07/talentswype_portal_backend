@@ -33,6 +33,8 @@ export async function sendEmail(to, subject, text, html = null) {
     } catch (error) {
         console.error("❌ CRTICAL ERROR sending email:", error);
         return { success: false, error: error.message };
+    } finally {
+        console.log("🏁 sendEmail execution finished for:", to);
     }
 }
 
