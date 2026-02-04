@@ -1,12 +1,20 @@
-import nodemailer from "nodemailer";
+// Create transporter using Standard SMTP (Webmail)
+const smtpPort = parseInt(process.env.SMTP_PORT || "465");
+const isSecure = smtpPort === 465;
 
-// Create transporter (using Gmail as example)
+console.log(`🔌 Email Config: Host=${process.env.SMTP_HOST} Port=${smtpPort} Secure=${isSecure} User=${process.env.EMAIL_USER}`);
+
 const transporter = nodemailer.createTransport({
-    service: "gmail", // you can also use "smtp.mailtrap.io" for testing
+    host: process.env.SMTP_HOST || "mail.talentswype.com",
+    port: smtpPort,
+    secure: isSecure, // true for 465, false for other ports
     auth: {
-        user: process.env.EMAIL_USER, // your email
-        pass: process.env.EMAIL_PASS, // app password or email password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
     },
+    // tls: {
+    //    rejectUnauthorized: false // Uncomment if you get "Self signed certificate" errors
+    // }
 });
 
 /**
