@@ -1,3 +1,5 @@
+import nodemailer from "nodemailer";
+
 // Create transporter using Standard SMTP (Webmail)
 const smtpPort = parseInt(process.env.SMTP_PORT || "465");
 const isSecure = smtpPort === 465;
