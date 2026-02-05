@@ -239,3 +239,45 @@ export const getCandidateHistory = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 };
+
+export const getHRs = async (req, res) => {
+    try {
+        const { search = "", page = 1, limit = 10 } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const limitNum = parseInt(limit);
+
+        let query = { userType: "HR" };
+
+        if (search) {
+            const regex = new RegExp(search, "i");
+            query.$or = [
+                { username: regex },
+                { email: regex },
+                { mobileNumber: regex },
+                { college: regex }
+            ];
+        }
+
+        const totalCount = await userModel.countDocuments(query);
+        const hrs = await userModel.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum)
+            .select("-password");
+
+        res.status(200).json({
+            success: true,
+            hrs,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalCount / limitNum),
+                totalHRs: totalCount,
+                limit: limitNum
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching HRs:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+};
