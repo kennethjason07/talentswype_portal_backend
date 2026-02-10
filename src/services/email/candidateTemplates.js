@@ -401,3 +401,71 @@ Team TalentSwype`;
     return { subject, text, html };
 }
 
+/**
+ * Email: Profile Completion Success
+ * Trigger: Candidate hits 100% profile completion
+ */
+export function profileCompletionSuccessTemplate(firstName) {
+    const subject = `Congratulations! Your profile is 100% complete 🏆`;
+    const text = `Hi ${firstName},
+
+Amazing job! Your TalentSwype profile is now 100% complete. 
+
+A complete profile makes you 5x more likely to be noticed by recruiters and hiring managers. Our team will now prioritize your profile for relevant job openings.
+
+Next steps:
+1. Browse the latest jobs: https://portal.talentswype.com/talentswypedashboard/jobs
+2. Keep your skills updated as you learn new things.
+3. Stay active to receive real-time interview invites.
+
+You're all set to land your dream role!
+
+Best regards,
+Team TalentSwype`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Profile Complete!</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #28a745;">Profile 100% Complete! 🏆</h2>
+    </div>
+
+    <p>Hi ${firstName},</p>
+
+    <p>Amazing job! You've successfully completed your TalentSwype profile. This is a huge step toward landing your next big opportunity.</p>
+
+    <div style="background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0;"><strong>Did you know?</strong></p>
+        <p style="margin: 10px 0 0 0;">Candidates with complete profiles get <strong>5x more engagement</strong> from top hiring teams compared to incomplete ones.</p>
+    </div>
+
+    <p>Your profile is now in our priority list. We'll actively match your skills with the best job openings on our platform.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="https://portal.talentswype.com/talentswypedashboard/jobs" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">View Recommended Jobs</a>
+    </div>
+
+    <p>Best of luck with your career journey!</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p>Best regards,<br>
+    <strong>Team TalentSwype</strong></p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>TalentSwype | Pune, India</em>
+    </p>
+
+</body>
+</html>
+    `;
+    return { subject, text, html };
+}

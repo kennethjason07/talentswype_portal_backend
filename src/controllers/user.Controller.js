@@ -6,7 +6,7 @@ import { sendSMS } from "../services/twilio.service.js";
 import otpModel from "../models/otp.Model.js";
 import { verifyEmailOtp, verifyPhoneOtp } from "../services/otp.service.js";
 import { forgotPasswordOtpTemplate, registerAutoPasswordTemplate, sendEmail, emailVerificationTemplate } from "../services/email/index.js";
-import { welcomeEmailTemplate } from "../services/email/candidateTemplates.js";
+import { welcomeEmailTemplate, profileCompletionSuccessTemplate } from "../services/email/candidateTemplates.js";
 import { welcomeHRTemplate } from "../services/email/hrTemplates.js";
 import userProfileModel from "../models/userProfile.Model.js";
 import packageModel from "../models/package.Model.js";
@@ -513,6 +513,20 @@ export const updateUserProfile = async (req, res) => {
 
         // Save triggers pre("save") → profileCompletion update
         await profile.save();
+
+        // Send "Profile Complete" email if it just hit 100%
+        try {
+            if (profile.isProfileComplete && profile.profileCompletion === 100) {
+                const user = await userModel.findById(userId);
+                if (user && !user.emailUnsubscribed) {
+                    const { subject, text, html } = profileCompletionSuccessTemplate(user.username);
+                    await sendEmail(user.email, subject, text, html);
+                    console.log(`✅ Profile completion email sent to: ${user.email}`);
+                }
+            }
+        } catch (emailError) {
+            console.error("❌ Error sending profile completion email:", emailError);
+        }
 
         res.status(200).json({
             success: true,

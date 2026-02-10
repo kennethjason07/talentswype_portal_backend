@@ -24,6 +24,7 @@ import CoursesRoutes from '../routes/courses.routes.js'
 import AssessmentRoutes from '../routes/assessment.routes.js'
 import WebinarRoutes from '../routes/webinar.routes.js'
 import AdminRoutes from '../routes/admin.routes.js'
+import FeedbackRoutes from '../routes/feedback.routes.js'
 
 // Initialize express app
 const app = express();
@@ -121,6 +122,7 @@ app.use('/api/v1', CoursesRoutes);
 app.use('/api/v1', AssessmentRoutes);
 app.use('/api/v1', WebinarRoutes);
 app.use('/api/v1', AdminRoutes);
+app.use('/api/v1', FeedbackRoutes);
 
 // 404 ~ not found error handler
 app.use((req, res, _next) => {
