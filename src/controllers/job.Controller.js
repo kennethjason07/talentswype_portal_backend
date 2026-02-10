@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import jobModel from "../models/job.Model.js";
 import jobApplicationModel from "../models/jobApplication.Model.js";
+import userModel from "../models/user.Model.js";
+import { sendEmail } from "../services/email/index.js";
+import { jobApplicationConfirmationTemplate } from "../services/email/candidateTemplates.js";
+import { newApplicantNotificationTemplate } from "../services/email/hrTemplates.js";
 
 // HR
 export const getHRJobs = async (req, res) => {
@@ -452,7 +456,7 @@ export const applyForJob = async (req, res) => {
         }
 
         // Check if job exists
-        const job = await jobModel.findById(jobId);
+        const job = await jobModel.findById(jobId).select("+publishBy");
         if (!job) {
             return res.status(404).json({
                 success: false,
@@ -498,6 +502,39 @@ export const applyForJob = async (req, res) => {
         });
 
         await application.save();
+
+        // Send Emails (Candidate Confirmation & HR Notification)
+        try {
+            const candidate = await userModel.findById(userId);
+            
+            // 1. Candidate Confirmation Email
+            if (candidate && !candidate.emailUnsubscribed) {
+                const { subject, text, html } = jobApplicationConfirmationTemplate(
+                    candidate.username,
+                    job.position || "Position",
+                    job.company || "Company"
+                );
+                await sendEmail(candidate.email, subject, text, html);
+                console.log(`✅ Application confirmation email sent to candidate: ${candidate.email}`);
+            }
+
+            // 2. HR Notification Email
+            if (job.publishBy) {
+                const hrUser = await userModel.findById(job.publishBy);
+                if (hrUser && !hrUser.emailUnsubscribed) {
+                    const { subject, text, html } = newApplicantNotificationTemplate(
+                        hrUser.username,
+                        candidate.username,
+                        job.position || "Position"
+                    );
+                    await sendEmail(hrUser.email, subject, text, html);
+                    console.log(`✅ New applicant notification sent to HR: ${hrUser.email}`);
+                }
+            }
+        } catch (emailError) {
+            console.error("❌ Error sending application emails:", emailError);
+            // Don't fail the response if emails fail
+        }
 
         res.status(201).json({
             success: true,

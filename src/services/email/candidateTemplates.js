@@ -334,3 +334,70 @@ Team TalentSwype`;
     `;
     return { subject, text, html };
 }
+
+/**
+ * Email: Job Application Confirmation
+ * Trigger: Candidate applies for a job
+ */
+export function jobApplicationConfirmationTemplate(firstName, jobTitle, companyName) {
+    const subject = `Application Received: ${jobTitle} at ${companyName} 📝`;
+    const text = `Hi ${firstName},
+
+Great news! We've received your application for the ${jobTitle} position at ${companyName}.
+
+Our team and the employer will now review your profile and experience. We’ll keep you updated on the status of your application through your dashboard.
+
+You can track your application status here: https://portal.talentswype.com/talentswypedashboard/your-jobs
+
+Thank you for choosing TalentSwype for your career journey!
+
+Best regards,
+Team TalentSwype`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Application Received</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #007bff;">Application Received! 📝</h2>
+    </div>
+
+    <p>Hi ${firstName},</p>
+
+    <p>Great news! We've successfully received your application for the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong>.</p>
+
+    <div style="background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0;"><strong>What's next?</strong></p>
+        <p style="margin: 10px 0 0 0;">Our team and the employer will now review your profile and skills. If there's a match, you'll be contacted for the next rounds.</p>
+    </div>
+
+    <p>You can track all your applications and their current status right from your dashboard:</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="https://portal.talentswype.com/talentswypedashboard/your-jobs" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Track My Application</a>
+    </div>
+
+    <p>Best of luck with your application!</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p>Best regards,<br>
+    <strong>Team TalentSwype</strong></p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>TalentSwype | Pune, India</em>
+    </p>
+
+</body>
+</html>
+    `;
+    return { subject, text, html };
+}
+

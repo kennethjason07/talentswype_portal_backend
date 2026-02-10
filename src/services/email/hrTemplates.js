@@ -349,3 +349,73 @@ Shantanu & Team TalentSwype`;
     `;
     return { subject, text, html };
 }
+
+/**
+ * Email: New Applicant Notification
+ * Trigger: Candidate applies for a job posted by HR
+ */
+export function newApplicantNotificationTemplate(hrName, candidateName, jobTitle) {
+    const subject = `New Application Received for ${jobTitle} 🚀`;
+    const text = `Hi ${hrName},
+
+You have a new applicant for the position of "${jobTitle}".
+
+Candidate Name: ${candidateName}
+
+Login to your dashboard to review the candidate's profile, resume, and skills: https://employer.talentswype.com/talentswypedashboard
+
+Our recommendation:
+Top candidates get hired within 48-72 hours. We recommend reviewing this profile and moving to the next stage promptly to secure the best talent.
+
+Best regards,
+Team TalentSwype`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New Applicant Received</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #007bff;">New Applicant! 🚀</h2>
+    </div>
+
+    <p>Hi ${hrName},</p>
+
+    <p>You have just received a new application for your job posting: <strong>${jobTitle}</strong>.</p>
+
+    <div style="background-color: #f8f9fa; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0;"><strong>Candidate Name:</strong> ${candidateName}</p>
+        <p style="margin: 5px 0 0 0;">Review their profile and move them to the next stage from your dashboard.</p>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="https://employer.talentswype.com/talentswypedashboard" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">View Candidate Profile</a>
+    </div>
+
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0; color: #856404;"><strong>💡 Hiring Tip:</strong> Top talent moves fast! Try to review and respond within 24-48 hours to secure the best candidate for your team.</p>
+    </div>
+
+    <p>Happy hiring!</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p>Best regards,<br>
+    <strong>Team TalentSwype</strong></p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #777; text-align: center;">
+        <em>TalentSwype | Pune, India</em>
+    </p>
+
+</body>
+</html>
+    `;
+    return { subject, text, html };
+}
+
