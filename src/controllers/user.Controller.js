@@ -536,12 +536,20 @@ export const getUserProfile = async (req, res) => {
 
         const profile = await userProfileModel.findOne({ user: userId });
 
+        const userData = user.toObject();
+        let profileData = {};
+        
+        if (profile) {
+            const { _id, user, createdAt, updatedAt, __v, ...rest } = profile.toObject();
+            profileData = rest;
+            profileData.profileId = _id;
+        }
+
         res.status(200).json({
             success: true,
             data: {
-                ...user.toObject(),
-                skills: profile ? profile.skills : [],
-                profileId: profile?._id
+                ...userData,
+                ...profileData
             }
         });
     } catch (error) {
@@ -562,7 +570,13 @@ export const getUser = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json(user);
+        const profile = await userProfileModel.findOne({ user: userId });
+        
+        const userData = user.toObject();
+        userData.profileCompletion = profile ? profile.profileCompletion : 0;
+        userData.isProfileComplete = profile ? profile.isProfileComplete : false;
+
+        res.status(200).json(userData);
     } catch (error) {
         console.error("Error fetching current user:", error);
         res.status(500).json({ message: "Server error" });
