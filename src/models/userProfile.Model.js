@@ -18,6 +18,7 @@ export const UserProfileSchema = new mongoose.Schema({
     city: { type: String },
     state: { type: String },
     bio: { type: String },
+    resumeGcsPath: { type: String },
     trainingInternships: [{
         companyName: { type: String },
         postName: { type: String },
@@ -59,7 +60,7 @@ UserProfileSchema.methods.calculateProfileCompletion = function () {
     // Flat fields
     const fieldsToCheck = [
         "profile", "degree", "stream", "semester", "yearofpass",
-        "percentage", "position", "address", "city", "state", "bio"
+        "percentage", "position", "address", "city", "state", "bio", "resumeGcsPath"
     ];
 
     fieldsToCheck.forEach(field => {
