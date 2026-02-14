@@ -269,6 +269,13 @@ export async function sendLoginOtp(req, res) {
         });
     } catch (error) {
         console.error("Send Login OTP Error:", error);
+        if (error?.code === "TWILIO_NOT_CONFIGURED") {
+            return res.status(503).json({
+                success: false,
+                message: "Phone OTP is currently disabled",
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",

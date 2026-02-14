@@ -8,7 +8,8 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
 
-const client = twilio(accountSid, authToken);
+const isTwilioConfigured = Boolean(accountSid && authToken && twilioPhone);
+const client = isTwilioConfigured ? twilio(accountSid, authToken) : null;
 
 /**
  * Send SMS using Twilio
@@ -18,6 +19,12 @@ const client = twilio(accountSid, authToken);
  */
 export const sendSMS = async (to, message) => {
     try {
+        if (!isTwilioConfigured) {
+            const error = new Error("Twilio is not configured");
+            error.code = "TWILIO_NOT_CONFIGURED";
+            throw error;
+        }
+
         const formattedNumber = `+91${to}`;
         
         const response = await client.messages.create({
