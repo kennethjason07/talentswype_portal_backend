@@ -446,9 +446,9 @@ export const getJobById = async (req, res) => {
 export const applyForJob = async (req, res) => {
     try {
         const { userId, userType } = req.user;
-        const { jobId, resumeUrl, coverLetter } = req.body;
+        const { jobId, resumeGcsPath, coverLetter } = req.body;
 
-        if (!jobId || !resumeUrl) {
+        if (!jobId || !resumeGcsPath) {
             return res.status(403).json({
                 success: false,
                 message: "Missing required fields",
@@ -489,7 +489,7 @@ export const applyForJob = async (req, res) => {
         const application = new jobApplicationModel({
             job: jobId,
             applicant: userId,
-            resumeUrl,
+            resumeGcsPath,
             coverLetter,
             status: "applied",
             statusHistory: [

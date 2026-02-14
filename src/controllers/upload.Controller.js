@@ -1,0 +1,164 @@
+import multer from 'multer';
+import path from 'path';
+import { uploadToGCS, generateSignedUrl, fileExists } from '../utils/uploadToGCS.js';
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const DEFAULT_SIGNED_URL_EXPIRY_SECONDS = 15 * 60;
+
+const ALLOWED_MIME_TO_EXTENSIONS = {
+    'application/pdf': ['.pdf'],
+    'application/msword': ['.doc'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+};
+
+const isAllowedFile = (file) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowedExtensions = ALLOWED_MIME_TO_EXTENSIONS[file.mimetype] || [];
+    return allowedExtensions.includes(ext);
+};
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: MAX_FILE_SIZE_BYTES,
+    },
+    fileFilter: (req, file, cb) => {
+        if (!isAllowedFile(file)) {
+            cb(new Error('Invalid file type. Only PDF, DOC, and DOCX are allowed.'));
+            return;
+        }
+
+        cb(null, true);
+    },
+});
+
+const sanitizeFilePath = (value) => {
+    if (!value) {
+        return null;
+    }
+
+    const decoded = decodeURIComponent(value).replace(/\\/g, '/');
+    if (!decoded.startsWith('resumes/') || decoded.includes('..') || decoded.includes('//')) {
+        return null;
+    }
+
+    return decoded;
+};
+
+const getUploadedFileFromRequest = (req) => {
+    if (req.file) {
+        return req.file;
+    }
+
+    if (req.files?.file?.[0]) {
+        return req.files.file[0];
+    }
+
+    if (req.files?.resume?.[0]) {
+        return req.files.resume[0];
+    }
+
+    return null;
+};
+
+export const uploadResume = async (req, res) => {
+    try {
+        const uploadedFile = getUploadedFileFromRequest(req);
+
+        if (!uploadedFile) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file uploaded',
+            });
+        }
+
+        const uploadResult = await uploadToGCS(
+            uploadedFile.buffer,
+            uploadedFile.originalname,
+            uploadedFile.mimetype
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Resume uploaded successfully',
+            data: {
+                filename: uploadResult.filename,
+                originalName: uploadResult.originalName,
+                size: uploadResult.size,
+            },
+        });
+    } catch (error) {
+        console.error('Upload Error:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Error uploading file',
+        });
+    }
+};
+
+export const getResumeSignedUrl = async (req, res) => {
+    try {
+        const sanitizedFilename = sanitizeFilePath(req.params.filename);
+
+        if (!sanitizedFilename) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid filename format',
+            });
+        }
+
+        const exists = await fileExists(sanitizedFilename);
+        if (!exists) {
+            return res.status(404).json({
+                success: false,
+                message: 'Resume not found',
+            });
+        }
+
+        const signedUrl = await generateSignedUrl(sanitizedFilename, DEFAULT_SIGNED_URL_EXPIRY_SECONDS);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                url: signedUrl,
+                expiresIn: DEFAULT_SIGNED_URL_EXPIRY_SECONDS,
+            },
+        });
+    } catch (error) {
+        console.error('Error generating signed URL:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Error generating resume URL',
+        });
+    }
+};
+
+export const uploadMiddleware = upload.fields([
+    { name: 'file', maxCount: 1 },
+    { name: 'resume', maxCount: 1 },
+]);
+
+export const handleUploadMulterError = (err, req, res, next) => {
+    if (!err) {
+        return next();
+    }
+
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                message: 'File size exceeds the maximum allowed size of 5MB',
+            });
+        }
+
+        return res.status(400).json({
+            success: false,
+            message: err.message,
+        });
+    }
+
+    return res.status(400).json({
+        success: false,
+        message: err.message || 'Invalid upload request',
+    });
+};

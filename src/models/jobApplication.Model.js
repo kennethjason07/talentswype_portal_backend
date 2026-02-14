@@ -11,9 +11,11 @@ export const JobApplicationSchema = new mongoose.Schema({
         ref: "User",
         required: [true, "Applicant reference is required"],
     },
-    resumeUrl: {
+    resumeGcsPath: {
         type: String,
-        // required: [true, "Resume URL is required"],
+        // Stores GCS filename (e.g., "resumes/uuid.pdf")
+        // Use signed URLs for viewing - call /api/v1/upload/resume/view/:filename
+        // required: [true, "Resume is required"],
     },
     coverLetter: {
         type: String,
