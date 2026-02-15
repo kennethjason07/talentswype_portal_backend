@@ -108,6 +108,10 @@ const getUploadedFileFromRequest = (req) => {
         return req.files.file[0];
     }
 
+    if (req.files?.logo?.[0]) {
+        return req.files.logo[0];
+    }
+
     if (req.files?.resume?.[0]) {
         return req.files.resume[0];
     }
