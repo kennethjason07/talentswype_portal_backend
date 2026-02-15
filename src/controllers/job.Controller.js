@@ -2,9 +2,74 @@ import mongoose from "mongoose";
 import jobModel from "../models/job.Model.js";
 import jobApplicationModel from "../models/jobApplication.Model.js";
 import userModel from "../models/user.Model.js";
+import userProfileModel from "../models/userProfile.Model.js";
 import { sendEmail } from "../services/email/index.js";
 import { jobApplicationConfirmationTemplate } from "../services/email/candidateTemplates.js";
 import { newApplicantNotificationTemplate } from "../services/email/hrTemplates.js";
+import { generateSignedUrl } from "../utils/uploadToGCS.js";
+import { companyLogoBucketName } from "../config/gcs.config.js";
+
+const buildPublisherLogoMaps = async (publisherIds = []) => {
+    const uniqueIds = [...new Set(
+        publisherIds
+            .filter(Boolean)
+            .map((id) => id.toString())
+    )];
+
+    if (!uniqueIds.length) {
+        return {
+            logoPathByPublisherId: new Map(),
+            logoUrlByPublisherId: new Map(),
+        };
+    }
+
+    const profiles = await userProfileModel
+        .find({ user: { $in: uniqueIds } })
+        .select("user companyLogoGcsPath");
+
+    const logoPathByPublisherId = new Map();
+    profiles.forEach((profile) => {
+        if (profile.companyLogoGcsPath) {
+            logoPathByPublisherId.set(profile.user.toString(), profile.companyLogoGcsPath);
+        }
+    });
+
+    const logoUrlEntries = await Promise.all(
+        [...logoPathByPublisherId.entries()].map(async ([publisherId, logoPath]) => {
+            try {
+                const logoUrl = await generateSignedUrl(logoPath, 15 * 60, {
+                    bucketNameOverride: companyLogoBucketName,
+                });
+                return [publisherId, logoUrl];
+            } catch (error) {
+                console.error(`Failed to generate company logo URL for publisher ${publisherId}:`, error.message);
+                return [publisherId, null];
+            }
+        })
+    );
+
+    const logoUrlByPublisherId = new Map(
+        logoUrlEntries.filter(([, url]) => Boolean(url))
+    );
+
+    return { logoPathByPublisherId, logoUrlByPublisherId };
+};
+
+const attachPublisherLogoToJob = (job, logoPathByPublisherId, logoUrlByPublisherId) => {
+    const publisherId = job?.publishBy ? job.publishBy.toString() : null;
+    if (!publisherId) {
+        return job;
+    }
+
+    const companyLogoGcsPath = logoPathByPublisherId.get(publisherId) || null;
+    const companyLogoUrl = logoUrlByPublisherId.get(publisherId) || null;
+
+    return {
+        ...job,
+        companyLogoGcsPath,
+        logoUrl: companyLogoUrl || job.logoUrl,
+    };
+};
 
 // HR
 export const getHRJobs = async (req, res) => {
@@ -354,19 +419,29 @@ export const getJobs = async (req, res) => {
             query.key_skills = { $in: skillArray.map(s => s.trim()) };
         }
 
-        const jobs = await jobModel.find(query).sort({ createdAt: -1 });
+        const jobs = await jobModel.find(query).select("+publishBy").sort({ createdAt: -1 });
+        const jobsData = jobs.map((job) => job.toObject());
+        const publisherIds = jobsData.map((job) => job.publishBy).filter(Boolean);
+        const { logoPathByPublisherId, logoUrlByPublisherId } = await buildPublisherLogoMaps(publisherIds);
 
         // If user is logged in, check which jobs they applied to
-        let jobsWithStatus = jobs.map(job => ({ ...job.toObject(), hasApplied: false }));
+        let jobsWithStatus = jobsData.map((job) => {
+            const enrichedJob = attachPublisherLogoToJob(job, logoPathByPublisherId, logoUrlByPublisherId);
+            const { publishBy, ...jobWithoutPublisher } = enrichedJob;
+            return {
+                ...jobWithoutPublisher,
+                hasApplied: false,
+            };
+        });
 
         if (req.user) {
             const userId = req.user.userId;
             const applications = await jobApplicationModel.find({ applicant: userId }).select("job");
             const appliedJobIds = new Set(applications.map(app => app.job.toString()));
 
-            jobsWithStatus = jobs.map(job => ({
-                ...job.toObject(),
-                hasApplied: appliedJobIds.has(job._id.toString())
+            jobsWithStatus = jobsWithStatus.map(job => ({
+                ...job,
+                hasApplied: appliedJobIds.has(job._id.toString()),
             }));
         }
 
@@ -428,10 +503,14 @@ export const getJobById = async (req, res) => {
             if (application) hasApplied = true;
         }
 
+        const jobData = job.toObject();
+        const { logoPathByPublisherId, logoUrlByPublisherId } = await buildPublisherLogoMaps([jobData.publishBy]);
+        const enrichedJob = attachPublisherLogoToJob(jobData, logoPathByPublisherId, logoUrlByPublisherId);
+
         res.status(200).json({
             success: true,
             data: {
-                ...job.toObject(),
+                ...enrichedJob,
                 hasApplied
             },
         });
@@ -554,13 +633,35 @@ export const getMyApplications = async (req, res) => {
         const { userId, userType } = req.user;
 
         const applications = await jobApplicationModel.find({ applicant: userId })
-            .populate("job")
+            .populate({ path: "job", select: "+publishBy" })
             .sort({ createdAt: -1 });
+
+        const applicationsData = applications.map((application) => application.toObject());
+        const publisherIds = applicationsData
+            .map((application) => application.job?.publishBy)
+            .filter(Boolean);
+        const { logoPathByPublisherId, logoUrlByPublisherId } = await buildPublisherLogoMaps(publisherIds);
+
+        const enrichedApplications = applicationsData.map((application) => {
+            if (!application.job) {
+                return application;
+            }
+            const enrichedJob = attachPublisherLogoToJob(
+                application.job,
+                logoPathByPublisherId,
+                logoUrlByPublisherId
+            );
+            const { publishBy, ...jobWithoutPublisher } = enrichedJob;
+            return {
+                ...application,
+                job: jobWithoutPublisher,
+            };
+        });
 
         res.status(200).json({
             success: true,
-            count: applications.length,
-            data: applications,
+            count: enrichedApplications.length,
+            data: enrichedApplications,
         });
     } catch (error) {
         res.status(500).json({
