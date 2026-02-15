@@ -16,6 +16,7 @@ const ALLOWED_MIME_TO_EXTENSIONS = {
 const ALLOWED_LOGO_MIME_TO_EXTENSIONS = {
     'image/png': ['.png'],
     'image/jpeg': ['.jpg', '.jpeg'],
+    'image/pjpeg': ['.jpg', '.jpeg', '.jfif'],
     'image/jpg': ['.jpg', '.jpeg'],
     'image/webp': ['.webp'],
 };
@@ -29,7 +30,17 @@ const isAllowedFile = (file) => {
 const isAllowedLogoFile = (file) => {
     const ext = path.extname(file.originalname || '').toLowerCase();
     const allowedExtensions = ALLOWED_LOGO_MIME_TO_EXTENSIONS[file.mimetype] || [];
-    return allowedExtensions.includes(ext);
+    if (allowedExtensions.length === 0) {
+        return false;
+    }
+
+    // Some valid JPEG uploads arrive with uncommon/missing extensions (e.g., .jfif).
+    // If MIME type is allowed, accept empty extension; otherwise enforce known extensions.
+    if (!ext) {
+        return true;
+    }
+
+    return allowedExtensions.includes(ext) || (file.mimetype === 'image/jpeg' && ext === '.jfif');
 };
 
 const upload = multer({
@@ -54,7 +65,7 @@ const uploadLogo = multer({
     },
     fileFilter: (req, file, cb) => {
         if (!isAllowedLogoFile(file)) {
-            cb(new Error('Invalid logo file type. Only PNG, JPG/JPEG, and WEBP are allowed.'));
+            cb(new Error('Invalid logo file type. Allowed: PNG, JPG/JPEG/JFIF, WEBP.'));
             return;
         }
 

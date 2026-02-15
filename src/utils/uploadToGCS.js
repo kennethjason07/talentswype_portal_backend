@@ -8,6 +8,7 @@ const MIME_TO_EXTENSION = {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
     'image/png': '.png',
     'image/jpeg': '.jpg',
+    'image/pjpeg': '.jpg',
     'image/jpg': '.jpg',
     'image/webp': '.webp',
 };
