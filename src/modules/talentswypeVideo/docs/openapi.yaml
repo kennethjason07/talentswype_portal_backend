@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: Talentswype Video-First Interview API
+  version: 1.0.0
+servers:
+  - url: https://api.your-domain.com
+  - url: http://localhost:8020
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CandidateSignupRequest:
+      type: object
+      required: [email, firstName, lastName]
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        resumeUrl:
+          type: string
+          format: uri
+        foundationalInterviewSetId:
+          type: string
+          format: uuid
+        invitationMessage:
+          type: string
+          minLength: 10
+    TriggerInterviewRequest:
+      type: object
+      required: [flowmingoInterviewSetId]
+      properties:
+        flowmingoInterviewSetId:
+          type: string
+          format: uuid
+        invitationMessage:
+          type: string
+          minLength: 10
+        sendInvite:
+          type: boolean
+          default: true
+        interviewType:
+          type: string
+          enum: [FOUNDATIONAL, FOLLOW_UP]
+          default: FOLLOW_UP
+        jobId:
+          type: string
+        followUpQuestions:
+          type: array
+          items:
+            type: string
+    ShortlistRequest:
+      type: object
+      required: [candidateId]
+      properties:
+        candidateId:
+          type: string
+          format: uuid
+        notes:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+paths:
+  /candidates/signup:
+    post:
+      summary: Register a candidate and auto-trigger foundational interview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateSignupRequest'
+      responses:
+        '201':
+          description: Candidate created
+        '409':
+          description: Candidate already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /candidates/{id}/interview:
+    post:
+      summary: Trigger reusable interview invite after signup
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerInterviewRequest'
+      responses:
+        '202':
+          description: Interview queued and Flowmingo invite requested
+        '404':
+          description: Candidate not found
+  /candidates/{id}:
+    get:
+      summary: Get candidate profile with video-first discovery card
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Candidate details
+        '401':
+          description: Unauthorized
+  /candidates/{id}/video:
+    get:
+      summary: Get candidate interview video metadata and score
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Video metadata with latest score
+        '404':
+          description: Video metadata not found
+  /hr/jobs/{jobId}/shortlist:
+    post:
+      summary: Shortlist candidate for a job and create HR notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortlistRequest'
+      responses:
+        '200':
+          description: Candidate shortlisted
+        '401':
+          description: Unauthorized
+  /webhooks/flowmingo:
+    post:
+      summary: Consume Flowmingo webhook events (status + evaluation)
+      description: Validates X-Webhook-Signature and processes interview completion/score updates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed
+        '401':
+          description: Invalid signature

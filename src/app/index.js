@@ -25,6 +25,10 @@ import WebinarRoutes from '../routes/webinar.routes.js';
 import AdminRoutes from '../routes/admin.routes.js';
 import FeedbackRoutes from '../routes/feedback.routes.js';
 import UploadRoutes from '../routes/upload.Routes.js';
+import {
+    talentswypeVideoRouter,
+    talentswypeWebhookRouter,
+} from '../modules/talentswypeVideo/routes/talentswypeVideo.routes.js';
 
 const app = express();
 
@@ -38,6 +42,10 @@ app.options('*', cors(corsOptions));
 
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(cookieParser());
+
+// Webhook route must read raw body for signature validation.
+app.use(talentswypeWebhookRouter);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -78,6 +86,7 @@ app.use('/api/v1', WebinarRoutes);
 app.use('/api/v1', AdminRoutes);
 app.use('/api/v1', FeedbackRoutes);
 app.use('/api/v1', UploadRoutes);
+app.use(talentswypeVideoRouter);
 
 app.use((req, res) => {
     res.status(404).json({
