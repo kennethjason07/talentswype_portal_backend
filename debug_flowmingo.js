@@ -1,0 +1,70 @@
+import './src/configs/dotenv.js';
+
+async function testFlowmingo() {
+    const apiKey = process.env.FLOWMINGO_API_KEY?.trim();
+    const setId = process.env.FLOWMINGO_FOUNDATIONAL_INTERVIEW_SET_ID?.trim();
+    const endpoint = process.env.FLOWMINGO_INVITE_API_URL || 'https://apis.flowmingo.ai/company/integration/interview/candidate/invite/v1';
+
+    console.log('--- Flowmingo Diagnostic ---');
+    console.log('Endpoint:', endpoint);
+    console.log('Set ID:', setId);
+    console.log('API Key starts with:', apiKey?.substring(0, 15) + '...');
+
+    const payloads = [
+        {
+            name: 'Doc Sample Payload (candidates)',
+            data: {
+                com_interview_set_id: setId,
+                candidates: [{ name: 'Test User', email: 'test_diag@example.com' }],
+                send_invite: false
+            }
+        },
+        {
+            name: 'Troubleshooting Suggestion (to)',
+            data: {
+                com_interview_set_id: setId,
+                to: [{ name: 'Test User', email: 'test_diag@example.com' }],
+                send_invite: false
+            }
+        },
+        {
+            name: 'Valid Invitation Message (>= 10 chars)',
+            data: {
+                com_interview_set_id: setId,
+                candidates: [{ name: 'Test User', email: 'test_diag@example.com' }],
+                invitation_message: 'This is a long enough invitation message for testing.',
+                send_invite: false
+            }
+        },
+        {
+            name: 'Payload with interview_set_id (no com_ prefix)',
+            data: {
+                interview_set_id: setId,
+                candidates: [{ name: 'Test User', email: 'test_diag@example.com' }],
+                send_invite: false
+            }
+        }
+    ];
+
+    for (const p of payloads) {
+        console.log(`\nTesting: ${p.name}...`);
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': apiKey,
+                },
+                body: JSON.stringify(p.data),
+            });
+
+            const body = await res.text();
+            console.log('Status:', res.status);
+            console.log('Response:', body);
+        } catch (error) {
+            console.error('Error:', error.message);
+        }
+    }
+}
+
+testFlowmingo();
