@@ -4,9 +4,9 @@ export const candidateSignupSchema = z.object({
   body: z.object({
     email: z.string().email(),
     firstName: z.string().min(1).max(100),
-    lastName: z.string().min(1).max(100),
+    lastName: z.string().max(100).optional(),
     phone: z.string().min(7).max(25).optional(),
-    resumeUrl: z.string().url().optional(),
+    resumeUrl: z.string().max(500).optional(),
     foundationalInterviewSetId: z.string().uuid().optional(),
     invitationMessage: z.string().min(10).max(1000).optional(),
   }),
