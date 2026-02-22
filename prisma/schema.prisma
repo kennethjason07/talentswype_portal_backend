@@ -33,7 +33,7 @@ model Candidate {
   id             String              @id @default(uuid())
   email          String              @unique
   firstName      String
-  lastName       String
+  lastName       String?
   phone          String?
   resumeUrl      String?
   status         CandidateStatus     @default(PENDING)

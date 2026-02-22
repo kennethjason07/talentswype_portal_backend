@@ -1,18 +1,24 @@
 import logger from '../../../middleware/winston.logger.js';
 
 function buildFlowmingoInvitePayload(candidate, input) {
-  return {
+  const payload = {
     com_interview_set_id: input.flowmingoInterviewSetId,
     candidates: [
       {
-        name: `${candidate.firstName} ${candidate.lastName}`.trim(),
+        name: `${candidate.firstName} ${candidate.lastName || ''}`.trim(),
         email: candidate.email,
-        cv_link: candidate.resumeUrl || undefined,
       },
     ],
     invitation_message: input.invitationMessage,
     send_invite: input.sendInvite ?? true,
   };
+
+  // Only attach cv_link if it's a valid absolute URL (Flowmingo requirement)
+  if (candidate.resumeUrl && candidate.resumeUrl.startsWith('http')) {
+    payload.candidates[0].cv_link = candidate.resumeUrl;
+  }
+
+  return payload;
 }
 
 export async function inviteCandidateViaFlowmingo(candidate, input) {
