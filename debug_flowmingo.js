@@ -37,6 +37,18 @@ async function testFlowmingo() {
             }
         },
         {
+            name: 'Payload with Valid CV Link',
+            data: {
+                com_interview_set_id: setId,
+                candidates: [{ 
+                    name: 'Test CV User', 
+                    email: 'test_cv@example.com',
+                    cv_link: 'https://storage.googleapis.com/flowmingo-demo/cv/alex.pdf'
+                }],
+                send_invite: false
+            }
+        },
+        {
             name: 'Payload with interview_set_id (no com_ prefix)',
             data: {
                 interview_set_id: setId,
