@@ -3,6 +3,7 @@ import { CandidateController } from '../controllers/candidate.controller.js';
 import { HrController } from '../controllers/hr.controller.js';
 import { FlowmingoWebhookController } from '../controllers/flowmingoWebhook.controller.js';
 import { hrAuth } from '../middleware/hrAuth.middleware.js';
+import UserAuth from '../../../middleware/user.Auth.js';
 import {
   candidateIdParamSchema,
   candidateSignupSchema,
@@ -14,6 +15,7 @@ import {
 const router = express.Router();
 
 router.post('/candidates/signup', validate(candidateSignupSchema), CandidateController.signup);
+router.get('/candidates/me', UserAuth, CandidateController.getSelf);
 router.post('/candidates/:id/interview', validate(triggerInterviewSchema), CandidateController.triggerInterview);
 router.get('/candidates/:id', hrAuth, validate(candidateIdParamSchema), CandidateController.getById);
 router.get('/candidates/:id/video', hrAuth, validate(candidateIdParamSchema), CandidateController.getVideo);

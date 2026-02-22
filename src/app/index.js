@@ -86,7 +86,7 @@ app.use('/api/v1', WebinarRoutes);
 app.use('/api/v1', AdminRoutes);
 app.use('/api/v1', FeedbackRoutes);
 app.use('/api/v1', UploadRoutes);
-app.use(talentswypeVideoRouter);
+app.use('/api/v1', talentswypeVideoRouter);
 
 app.use((req, res) => {
     res.status(404).json({

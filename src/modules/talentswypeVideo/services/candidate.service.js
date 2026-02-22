@@ -189,6 +189,32 @@ export class CandidateService {
     };
   }
 
+  static async getCandidateByEmail(email) {
+    const candidate = await prisma.candidate.findUnique({
+      where: { email },
+      include: {
+        interviews: {
+          include: {
+            result: true,
+            video: true,
+            followUps: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!candidate) return null;
+
+    const latestInterview = candidate.interviews[0];
+
+    return {
+      ...candidate,
+      latestInterviewStatus: latestInterview?.status || null,
+      latestScore: toNumberOrNull(latestInterview?.result?.overallScore),
+    };
+  }
+
   static async getCandidateVideo(candidateId) {
     const interview = await prisma.interview.findFirst({
       where: { candidateId },
