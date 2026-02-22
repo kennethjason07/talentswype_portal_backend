@@ -5,13 +5,16 @@ function buildFlowmingoInvitePayload(candidate, input) {
     com_interview_set_id: input.flowmingoInterviewSetId,
     candidates: [
       {
-        name: `${candidate.firstName} ${candidate.lastName || ''}`.trim(),
+        name: `${candidate.firstName || 'Candidate'} ${candidate.lastName || ''}`.trim(),
         email: candidate.email,
       },
     ],
-    invitation_message: input.invitationMessage,
     send_invite: input.sendInvite ?? true,
   };
+
+  if (input.invitationMessage && input.invitationMessage.trim().length > 0) {
+    payload.invitation_message = input.invitationMessage;
+  }
 
   // Only attach cv_link if it's a valid absolute URL (Flowmingo requirement)
   if (candidate.resumeUrl && candidate.resumeUrl.startsWith('http')) {
@@ -23,6 +26,9 @@ function buildFlowmingoInvitePayload(candidate, input) {
 
 export async function inviteCandidateViaFlowmingo(candidate, input) {
   const endpoint = process.env.FLOWMINGO_INVITE_API_URL || 'https://apis.flowmingo.ai/company/integration/interview/candidate/invite/v1';
+  const payload = buildFlowmingoInvitePayload(candidate, input);
+
+  logger.info(`Sending Flowmingo Invite: endpoint=${endpoint} payload=${JSON.stringify(payload)}`);
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -30,7 +36,7 @@ export async function inviteCandidateViaFlowmingo(candidate, input) {
       'Content-Type': 'application/json',
       'X-API-Key': process.env.FLOWMINGO_API_KEY,
     },
-    body: JSON.stringify(buildFlowmingoInvitePayload(candidate, input)),
+    body: JSON.stringify(payload),
   });
 
   let body = null;
