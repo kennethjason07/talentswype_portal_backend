@@ -2,7 +2,7 @@ import './src/configs/dotenv.js';
 
 async function testFlowmingo() {
     const apiKey = process.env.FLOWMINGO_API_KEY?.trim();
-    const setId = process.env.FLOWMINGO_FOUNDATIONAL_INTERVIEW_SET_ID?.trim();
+    const setId = 'f0521edd-bf49-4a26-a799-815f0433dcf6';
     const endpoint = process.env.FLOWMINGO_INVITE_API_URL || 'https://apis.flowmingo.ai/company/integration/interview/candidate/invite/v1';
 
     console.log('--- Flowmingo Diagnostic ---');
