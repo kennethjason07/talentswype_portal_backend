@@ -12,11 +12,14 @@ function toNumberOrNull(value) {
 }
 
 function extractFlowmingoCandidateId(inviteResult) {
-  if (!Array.isArray(inviteResult) || inviteResult.length === 0) {
-    return null;
+  // Try observed format: { results: [{ tal_candidate_id: "..." }] }
+  if (inviteResult?.results?.[0]?.tal_candidate_id) {
+    return inviteResult.results[0].tal_candidate_id;
   }
 
-  return inviteResult[0]?.interviewee?.id || null;
+  // Try documented/alternative format: [{ interviewee: { id: "..." } }]
+  const firstResult = Array.isArray(inviteResult) ? inviteResult[0] : inviteResult;
+  return firstResult?.interviewee?.id || null;
 }
 
 export class CandidateService {
