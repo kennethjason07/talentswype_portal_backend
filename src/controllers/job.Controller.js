@@ -8,6 +8,7 @@ import { jobApplicationConfirmationTemplate } from "../services/email/candidateT
 import { newApplicantNotificationTemplate } from "../services/email/hrTemplates.js";
 import { generateSignedUrl } from "../utils/uploadToGCS.js";
 import { companyLogoBucketName } from "../config/gcs.config.js";
+import { CandidateService } from "../modules/talentswypeVideo/services/candidate.service.js";
 
 const buildPublisherLogoMaps = async (publisherIds = []) => {
     const uniqueIds = [...new Set(
@@ -240,7 +241,7 @@ export const getApplicantsForJob = async (req, res) => {
             .sort({ createdAt: -1 });
 
         // Map applications to handle missing applicant data and ensure consistent structure
-        const enrichedApplications = applications.map(app => {
+        const enrichedApplications = await Promise.all(applications.map(async (app) => {
             const appObj = app.toObject();
             if (!appObj.applicant) {
                 // Fallback for missing applicant document
@@ -251,11 +252,25 @@ export const getApplicantsForJob = async (req, res) => {
                         email: "N/A",
                         mobileNumber: "N/A",
                         college: "N/A"
-                    }
+                    },
+                    videoInterview: null
                 };
             }
+
+            // Fetch video interview stats from Flowmingo/Video Module
+            try {
+                const videoData = await CandidateService.getCandidateByEmail(appObj.applicant.email);
+                appObj.videoInterview = videoData ? {
+                    status: videoData.latestInterviewStatus,
+                    score: videoData.latestScore
+                } : null;
+            } catch (err) {
+                console.error(`Error fetching video data for ${appObj.applicant.email}:`, err.message);
+                appObj.videoInterview = null;
+            }
+
             return appObj;
-        });
+        }));
 
         res.status(200).json({
             success: true,
@@ -813,20 +828,37 @@ export const getMatchingCandidates = async (req, res) => {
         });
 
         // Filter out profiles where populate failed (e.g. user was not USER type or deleted)
-        const candidates = matchedProfiles
+        const candidates = await Promise.all(matchedProfiles
             .filter(profile => profile.user)
-            .map(profile => ({
-                _id: profile.user._id, // Return User ID
-                username: profile.user.username,
-                email: profile.user.email,
-                mobileNumber: profile.user.mobileNumber,
-                college: profile.user.college,
-                profileId: profile._id,
-                skills: profile.skills, // Send all skills or just matched ones? Sending all helps context.
-                // Highlight matched skills could be done on frontend
-                matchedSkills: profile.skills
-                   .filter(s => skillRegexes.some(r => r.test(s.skill)))
-                   .map(s => s.skill)
+            .map(async (profile) => {
+                // Fetch video interview stats from Flowmingo/Video Module
+                let videoInterview = null;
+                try {
+                    const videoData = await CandidateService.getCandidateByEmail(profile.user.email);
+                    if (videoData) {
+                        videoInterview = {
+                            status: videoData.latestInterviewStatus,
+                            score: videoData.latestScore
+                        };
+                    }
+                } catch (err) {
+                    console.error(`Error fetching video matching data for ${profile.user.email}:`, err.message);
+                }
+
+                return {
+                    _id: profile.user._id, // Return User ID
+                    username: profile.user.username,
+                    email: profile.user.email,
+                    mobileNumber: profile.user.mobileNumber,
+                    college: profile.user.college,
+                    profileId: profile._id,
+                    skills: profile.skills, // Send all skills or just matched ones? Sending all helps context.
+                    // Highlight matched skills could be done on frontend
+                    matchedSkills: profile.skills
+                       .filter(s => skillRegexes.some(r => r.test(s.skill)))
+                       .map(s => s.skill),
+                    videoInterview
+                };
             }));
 
         res.status(200).json({
