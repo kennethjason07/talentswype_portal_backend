@@ -239,10 +239,28 @@ export const getApplicantsForJob = async (req, res) => {
             .populate("applicant", "username email mobileNumber college")
             .sort({ createdAt: -1 });
 
+        // Map applications to handle missing applicant data and ensure consistent structure
+        const enrichedApplications = applications.map(app => {
+            const appObj = app.toObject();
+            if (!appObj.applicant) {
+                // Fallback for missing applicant document
+                return {
+                    ...appObj,
+                    applicant: {
+                        username: "Unknown Candidate",
+                        email: "N/A",
+                        mobileNumber: "N/A",
+                        college: "N/A"
+                    }
+                };
+            }
+            return appObj;
+        });
+
         res.status(200).json({
             success: true,
-            count: applications.length,
-            data: applications,
+            count: enrichedApplications.length,
+            data: enrichedApplications,
         });
     } catch (error) {
         console.error("GET_APPLICANTS_FOR_JOB_ERROR:", error);
