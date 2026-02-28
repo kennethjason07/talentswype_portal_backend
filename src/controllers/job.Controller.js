@@ -263,7 +263,10 @@ export const getApplicantsForJob = async (req, res) => {
                 appObj.videoInterview = videoData ? {
                     status: videoData.latestInterviewStatus,
                     score: videoData.latestScore
-                } : null;
+                } : {
+                    status: "NOT_INVITED",
+                    score: null
+                };
             } catch (err) {
                 console.error(`Error fetching video data for ${appObj.applicant.email}:`, err.message);
                 appObj.videoInterview = null;
@@ -831,8 +834,8 @@ export const getMatchingCandidates = async (req, res) => {
         const candidates = await Promise.all(matchedProfiles
             .filter(profile => profile.user)
             .map(async (profile) => {
-                // Fetch video interview stats from Flowmingo/Video Module
-                let videoInterview = null;
+                // Fetch video interview stats or use default
+                let videoInterview = { status: "NOT_INVITED", score: null };
                 try {
                     const videoData = await CandidateService.getCandidateByEmail(profile.user.email);
                     if (videoData) {
